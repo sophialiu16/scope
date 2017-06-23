@@ -1,1 +1,2 @@
 # scope
+Digital oscilloscope software 
