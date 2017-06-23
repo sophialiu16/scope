@@ -19,6 +19,7 @@
       3/13/94  Glen George       Updated comments.
       3/17/97  Glen George       Added constant MAX_SAMPLE_SIZE and removed
 	                         KEY_UNUSED.
+     06/22/17 Sophia Liu         changed keypad and display constants
 */
 
 
@@ -39,12 +40,12 @@
 /* constants */
 
 /* keypad constants */
-#define  KEY_MENU       0	/* <Menu>      */
-#define  KEY_UP         1	/* <Up>        */
-#define  KEY_DOWN       2	/* <Down>      */
-#define  KEY_LEFT       3	/* <Left>      */
-#define  KEY_RIGHT      4	/* <Right>     */
-#define  KEY_ILLEGAL    6	/* illegal key */
+#define  KEY_MENU       1	/* <Menu>      */
+#define  KEY_UP         2	/* <Up>        */
+#define  KEY_DOWN       4	/* <Down>      */
+#define  KEY_LEFT       8	/* <Left>      */
+#define  KEY_RIGHT      16	/* <Right>     */
+#define  KEY_ILLEGAL    0	/* illegal key */
 
 /* display constants */
 #define  SIZE_X         480	/* size in the x dimension */
