@@ -16,9 +16,9 @@
 #
 # Revision History: 06/06/17 Sophia Liu     initial revision
 
-# #include "interfac.h"
- .equ ROT_ADDRESS,0x00151010
- .equ KEY_ILLEGAL, 0
+#include "interfac.h"
+ # .equ ROT_ADDRESS,0x00151010
+ # .equ KEY_ILLEGAL, 0
 
 .section .text
 
@@ -270,4 +270,3 @@ ret
 .section .data
 .align 4
 key_pressed: .word 0x0         # 1 word unsigned int, contains current debounced key
-
