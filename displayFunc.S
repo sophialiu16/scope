@@ -16,9 +16,12 @@
 #
 # Revision History: 06/06/17 Sophia Liu     initial revision
 
-# include file for display constants
+# inc file for display constants
 #include "interfac.h"
 #include "scopedef.h"
+.equ TRUE, 1
+.equ SIZE_Y, 272
+.equ SIZE_X, 480
 .equ VRAM_ADDRESS,0x140000
 .equ VRAM_ADDRESS_END, VRAM_ADDRESS + 0x40000
 
@@ -55,6 +58,7 @@
 .type clear_display, @function
 clear_display:
 movia	r6, VRAM_ADDRESS    # store beginning address
+movia	r13, 0x17ffff
 movi	r9, 0x0             # value for black
 movi	r12, TRUE
 
@@ -62,7 +66,7 @@ clear_display_start:
 stb		r9, 0(r6)     # clear next vram byte
 addi	r6, r6, 1     # move to next address
 
-cmpeqi	r11, r6, VRAM_ADDDRESS_END    # check if reached end of vram
+cmpeq	r11, r6, r13                  # check if reached end of vram
 beq		r11, r12, clear_display_end   # if reached end address, end function
 jmpi	clear_display_start           # else move to next address
 
@@ -111,8 +115,14 @@ beq r8, r9, invalid_point   # if it is, end
 cmpgei r8, r5, SIZE_Y       # check if y point is too large for LCD
 beq r8, r9, invalid_point   # if it is, end
 
-add r10, r4, VRAM_ADDRESS  # add x offset to vram address
+movia r10, VRAM_ADDRESS     # get vram address
+add r10, r4, r10           # add x offset to vram address
 
+muli r11, r5, 512
+add r10, r11, r10           # add y offset to vram address
+
+stb		r6, 0(r10)          # store byte value in vram address
+jmpi end_plot
 
 invalid_point:
 ret
