@@ -36,7 +36,7 @@
 
 # include header files for constants
 #include "scopedef.h"
-#include "analog.h"
+#include "general.h"
 
 # set sample rate
 #
@@ -78,7 +78,7 @@ divu r2 , r8, r4         # divide clock frequency by sample rate for sample numb
                          # store result in r2 to return
 
 movia r8, SAMPLE_RATE_PIO # get address of sample rate pio
-stb r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
+stw r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
 
 ret
 
