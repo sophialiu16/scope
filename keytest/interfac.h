@@ -19,6 +19,7 @@
       3/13/94  Glen George       Updated comments.
       3/17/97  Glen George       Added constant MAX_SAMPLE_SIZE and removed
 	                         KEY_UNUSED.
+      07/16/17 Sophia Liu        changed key constants, comment update 
 */
 
 

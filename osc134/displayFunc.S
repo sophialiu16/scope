@@ -19,11 +19,12 @@
 # inc file for display constants
 #include "interfac.h"
 #include "scopedef.h"
-.equ TRUE, 1
-.equ SIZE_Y, 272
-.equ SIZE_X, 480
-.equ VRAM_ADDRESS,0x140000
-.equ VRAM_ADDRESS_END, VRAM_ADDRESS + 0x40000
+#include "general.h"
+# .equ TRUE, 1
+# .equ SIZE_Y, 272
+# .equ SIZE_X, 480
+# .equ VRAM_ADDRESS,0x140000
+# .equ VRAM_ADDRESS_END, VRAM_ADDRESS + 0x40000
 
 # Clear display
 #
@@ -58,7 +59,7 @@
 .type clear_display, @function
 clear_display:
 movia	r6, VRAM_ADDRESS    # store beginning address
-movia	r13, 0x17ffff
+movia	r13, VRAM_ADDRESS_END # 0x17ffff
 movi	r9, 0x0             # value for black
 movi	r12, TRUE
 

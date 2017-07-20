@@ -78,7 +78,7 @@ divu r2 , r8, r4         # divide clock frequency by sample rate for sample numb
                          # store result in r2 to return
 
 movia r8, SAMPLE_RATE_PIO # get address of sample rate pio
-stb r2, 0(r8)           # drive sample rate argument on sample rate pio output (byte?)
+stb r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
 
 ret
 
@@ -159,7 +159,7 @@ ret
 .type set_delay, @function
 set_delay:
 movia r8, SAMPLE_DELAY_PIO
-stb r4, 0(r8)    # write delay argument to delay pio core
+stw r4, 0(r8)    # write delay argument to delay pio core
 # convert delay to samples? DELAY SIZE?
 ret
 
@@ -199,12 +199,16 @@ ret
 .type start_sample, @function
 start_sample:
 # clear fifo/fifo full flag?
+movia r8, fifo_full_flag
+movi r9, FALSE
+stb r9, 0(r8)                 # store false in fifo full flag
+
 movia r8, AUTO_TRIGGER_PIO
-stb r4, 0(r8)    # write auto triggering argument to pio core
+stb r4, 0(r8)                 # write auto triggering argument to pio core
 
 movia r8, TRIGGER_ENABLE_PIO
 movi r9, TRUE
-stb r9, 0(r8)    # enable triggering by writing to trigger enable pio
+stb r9, 0(r8)     # enable triggering by writing to trigger enable pio
 
 movia r8, sample_done_flag
 movi r9, FALSE
@@ -261,15 +265,31 @@ bne r10, r8, return_null # If the flag is not true, fifo is not full,
                          #     return null.
 # beq r10, r8, return_pointer # Else flag is true, fifo is full, return pointer
 
-return_pointer:
-# copy fifo into data buffer TODO
+return_pointer: # copy fifo into data buffer
+movia r8, DATA_READY_PIO  # get address for fifo read clock
+movia r10, FIFO_DATA_PIO  # address to read fifo data from
+movia r11, data_buffer    # get address of data buffer shared variable
+addi r13, r11, NUM_SAMPLES # get address of last sample in data buffer
 
-# loop until # samples or until empty:
-# rdclk -> 0
-# rdclk -> 1
-# read from fifo, store in data buffer
-# next data buffer
+read_fifo_loop:
+ldb r11, 0(r10)            # read current sample from fifo
+stb r11, 0(r11)            # store sample in data buffer
+addi r11, r11, 1           # go to next address in data buffer
 
+bge r11, r13, got_sample   # if at address of last sample in data buffer,
+                           #     finished reading samples from fifo
+# blt r12, r13, read_fifo_loop_next # otherwise, continue loop
+
+read_fifo_loop_next:       # clock out next sample from fifo
+movi r9, 0
+stb r9, 0(r8) # TODO unnecessary?
+movi r9, 1
+stb r9, 0(r8)
+movi r9, 0
+stb r9, 0(r8)              # pulse read clock for fifo
+jmpi read_fifo_loop        # go back to top of loop to read next sample
+
+got_sample:
 movia r8, sample_done_flag
 movi r9, TRUE
 stb r9, 0(r8)            # set sample done flag to true - completed sample
@@ -284,7 +304,7 @@ ret
 # analog eh
 #
 #
-# Description: Handles interrupts for
+# Description: Handles interrupts for the fifo full interrupt.
 #
 # Operation:
 #
@@ -379,24 +399,19 @@ movi r9, FALSE
 stb r9, 0(r8)            # set sample done flag to false (???)
 
 init_trigger_info:
-# set up pios?
-# sample rate - input, # bits
+movia r8, TRIGGER_ENABLE_PIO
+movi r9, FALSE
+stb r9, 0(r8)    # disable triggering by writing to trigger enable pio
 
-# trigger - level = 2^6 (0 to 127)
-# trigger - slope = 1 bit
-
-# sample delay #bits?
-
-# initialize fifo full interrupt ---TODO args
 init_fifo_int:
-movui r4, 0            # arguments for alt_ic_isr_register
+movui r4, FIFO_FULL_IRQ      # arguments for alt_irq_register
 movui r5, 0
 movia r6, fifo_full_eh
-call alt_irq_register
+call alt_irq_register        # register fifo full interrupt
 
 movia r8, FIFO_FULL_PIO     # get pio core address
-movi r9, 0x0
-stbio r9, 4(r8)   # direction register, set to input
+# movi r9, 0x0
+# stbio r9, 4(r8)   # direction register, set to input
 
 movi r9, 0x0
 stbio r9, 12(r8)   # edge capture register, clear all
@@ -415,5 +430,4 @@ fifo_full_flag: .byte 0x0    # 1 byte boolean. TRUE if the fifo is full,
 sample_done_flag:  .byte 0x0 # 1 byte boolean. TRUE if the sample is done,
                              #     FALSE otherwise.
 
-# TODO
-data_buffer: .byte 0x0         # 1 word unsigned int, samples per second
+data_buffer: .skip NUM_SAMPLES  # buffer for sampled data from fifo buffer

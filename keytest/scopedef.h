@@ -84,7 +84,7 @@ enum keycode  {  KEYCODE_MENU,      /* <Menu>     */
 	         KEYCODE_RIGHT,     /* <Right>    */
 	         KEYCODE_ILLEGAL,   /* other keys */
 		 NUM_KEYCODES       /* number of key codes */
-              }; 
+              };
 
 
 
