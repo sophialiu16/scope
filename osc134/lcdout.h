@@ -52,7 +52,7 @@
 /* character output styles */
 enum  char_style  {  NORMAL,    /* "normal video" */
                      REVERSE	/* "reverse video" */
-	          };
+                   };
 
 
 

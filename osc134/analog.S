@@ -34,8 +34,8 @@
 #
 # Revision History: 06/24/17 Sophia Liu     initial revision
 
-# include header files for constants
-#include "scopedef.h"
+# inc header files for constants
+# inc "scopedef.h"
 #include "general.h"
 
 # set sample rate
@@ -73,7 +73,8 @@
 .global set_sample_rate
 .type set_sample_rate, @function # RATE OR NUM ON PIO? TODO
 set_sample_rate:
-movi r8, CLOCK_FREQ
+movhi r8, %hi(CLOCK_FREQ)
+ori r8, r8, %lo(CLOCK_FREQ) # store 32 bit clock frequency constant into register
 divu r2 , r8, r4         # divide clock frequency by sample rate for sample number
                          # store result in r2 to return
 
@@ -254,14 +255,14 @@ movi r8, TRUE
 
 movia r9, sample_done_flag
 ldb r10, 0(r9)           # get sample done flag from shared variable
-beq r10, r8, return_null # If the flag is true, the sample is already done,
+beq r10, r8, return_null_ # If the flag is true, the sample is already done,
                          #     return null.
 # bne r10, r8, check_fifo # Else flag is false, check if fifo is full
 
 check_fifo:
 movia r9, fifo_full_flag
 ldb r10, 0(r9)           # get fifo full flag from shared variable
-bne r10, r8, return_null # If the flag is not true, fifo is not full,
+bne r10, r8, return_null_ # If the flag is not true, fifo is not full,
                          #     return null.
 # beq r10, r8, return_pointer # Else flag is true, fifo is full, return pointer
 
@@ -297,8 +298,8 @@ stb r9, 0(r8)            # set sample done flag to true - completed sample
 movia r2, data_buffer    # return pointer to sampled data
 ret
 
-return_null:
-movi r2, NULL     # return null
+return_null_:
+movi r2, PTRNL     # return null?
 ret
 
 # analog eh
@@ -388,15 +389,18 @@ ret
 .global init_analog
 .type init_analog, @function
 init_analog:
+addi sp, sp, -8        # adjust stack pointer
+stw ra, 0(sp)          # store return address
+stw r28, 4(sp)         # store frame pointer
 # clear fifo?
-set_flags:
+# set_flags_analog:
 movia r8, fifo_full_flag
 movi r9, FALSE
 stb r9, 0(r8)            # set fifo full flag to false
 
 movia r8, sample_done_flag
 movi r9, FALSE
-stb r9, 0(r8)            # set sample done flag to false (???)
+stb r9, 0(r8)            # set sample done flag to false (?)
 
 init_trigger_info:
 movia r8, TRIGGER_ENABLE_PIO
@@ -404,7 +408,7 @@ movi r9, FALSE
 stb r9, 0(r8)    # disable triggering by writing to trigger enable pio
 
 init_fifo_int:
-movui r4, FIFO_FULL_IRQ      # arguments for alt_irq_register
+movui r4, 1 # FIFO_FULL_IRQ      # arguments for alt_irq_register
 movui r5, 0
 movia r6, fifo_full_eh
 call alt_irq_register        # register fifo full interrupt
@@ -419,6 +423,9 @@ stbio r9, 12(r8)   # edge capture register, clear all
 movi r9, 0x1
 stbio r9, 8(r8)    # interrupt mask register, enable interrupts
 
+ldw ra, 0(sp)          # load return address
+ldw r28, 4(sp)         # load frame pointer
+addi sp, sp, 8        # adjust stack pointer
 ret
 
 # data section

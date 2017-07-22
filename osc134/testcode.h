@@ -48,7 +48,7 @@
 /* function declarations */
 
 /* get a simulated test sample */
-void  get_test_sample(long int, int, unsigned char far *);
+void  get_test_sample(long int, int, unsigned char /*far*/ *);
 
 
 #endif

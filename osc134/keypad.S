@@ -228,7 +228,7 @@ movia r8, ROT_ADDRESS     # get pio core address
 movi r9, 0
 stbio r9, 8(r8)    # interrupt mask register, disable interrupts
 
-movui r4, 0            # arguments for alt_ic_isr_register
+movui r4, 0            # arguments for alt_irq_register
 movui r5, 0
 movia r6, keypadInterruptHandler
 call alt_irq_register

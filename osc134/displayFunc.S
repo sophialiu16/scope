@@ -18,7 +18,7 @@
 
 # inc file for display constants
 #include "interfac.h"
-#include "scopedef.h"
+#inc "scopedef.h"
 #include "general.h"
 # .equ TRUE, 1
 # .equ SIZE_Y, 272

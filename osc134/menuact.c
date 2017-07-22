@@ -1419,7 +1419,7 @@ void  trg_delay_up()
 
 */
 
-static void  adjust_trg_delay(int old_sweep, int new_sweep)
+void  adjust_trg_delay(int old_sweep, int new_sweep)
 {
     /* variables */
       /* none */
@@ -1583,7 +1583,7 @@ void  display_trg_delay(int x_pos, int y_pos, int style)
 
 */
 
-static void  cvt_num_field(long int n, char *s)
+void  cvt_num_field(long int n, char *s)
 {
     /* variables */
     int  dp = 3;		/* digits to right of decimal point */

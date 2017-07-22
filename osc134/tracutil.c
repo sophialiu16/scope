@@ -1017,7 +1017,7 @@ void  do_trace()
 
 */
 
-void  plot_trace(unsigned char far *sample)
+void  plot_trace(unsigned char /*far*/ *sample)
 {
     /* variables */
     int  x = 0;				/* current x position to plot */

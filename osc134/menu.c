@@ -74,7 +74,7 @@
 
 
 /* local function declarations */
-void  display_entry(int, int);      /* display a menu entry and its setting */
+static void  display_entry(int, int);      /* display a menu entry and its setting */
 
 
 

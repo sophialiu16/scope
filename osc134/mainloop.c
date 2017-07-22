@@ -53,7 +53,7 @@
 
 
 /* local function declarations */
-enum keycode  key_lookup(void);      /* translate key values into keycodes */
+static enum keycode  key_lookup(void);      /* translate key values into keycodes */
 
 
 
@@ -95,7 +95,7 @@ int  main()
 
     enum status         state = MENU_ON;    /* current program state */
 
-    unsigned char far  *sample;		    /* a captured trace */
+    unsigned char /*far*/  *sample;		    /* a captured trace */
 
     /* key processing functions (one for each system state type and key) */
     static enum status  (* const process_key[NUM_KEYCODES][NUM_STATES])(enum status) =
@@ -115,6 +115,8 @@ int  main()
 
     init_trace();		/* initialize the trace routines */
     init_menu();		/* initialize the menu system */
+    initKeypad();       /* initialize keypad */
+    init_analog();      /* initialize analog system */
 
 
     /* infinite loop processing input */

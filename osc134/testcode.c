@@ -83,7 +83,7 @@
 
 */
 
-void  get_test_sample(long int sample_rate, int sample_size, unsigned char far *sample)
+void  get_test_sample(long int sample_rate, int sample_size, unsigned char /*far*/ *sample)
 {
     /* variables */
 

@@ -116,7 +116,7 @@ void  set_delay(long int);		/* set the trigger delay time */
 
 /* sampling functions */
 void                start_sample(int);	/* capture a sample */
-unsigned char far  *sample_done(void);	/* sample captured status */
+unsigned char *sample_done(void);	/* sample captured status */
 
 
 #endif
