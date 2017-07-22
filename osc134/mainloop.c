@@ -113,6 +113,8 @@ int  main()
     /* first initialize everything */
     clear_display();		/* clear the display */
 
+    plot_pixel(428, 10, PIXEL_BLACK);
+
     init_trace();		/* initialize the trace routines */
     init_menu();		/* initialize the menu system */
     initKeypad();       /* initialize keypad */

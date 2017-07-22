@@ -50,8 +50,8 @@
 /* display constants */
 #define  SIZE_X         480	/* size in the x dimension */
 #define  SIZE_Y		    272     /* size in the y dimension */
-#define  PIXEL_WHITE      0xFF     /* pixel off */
-#define  PIXEL_BLACK      0     /* pixel on */
+#define  PIXEL_WHITE      0     /* pixel off */
+#define  PIXEL_BLACK      0xff     /* pixel on */
 
 /* scope parameters */
 #define  MIN_DELAY	   0    /* minimum trigger delay */

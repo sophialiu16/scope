@@ -75,8 +75,9 @@
 set_sample_rate:
 movhi r8, %hi(CLOCK_FREQ)
 ori r8, r8, %lo(CLOCK_FREQ) # store 32 bit clock frequency constant into register
-divu r2 , r8, r4         # divide clock frequency by sample rate for sample number
+divu r9 , r8, r4         # divide clock frequency by sample rate for sample number
                          # store result in r2 to return
+mov r2, r9
 
 movia r8, SAMPLE_RATE_PIO # get address of sample rate pio
 stw r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
@@ -342,10 +343,12 @@ stw r28, 0(sp)         # store frame pointer
 movia r8, FIFO_FULL_PIO
 ldb r9, 12(r8)         # read from edge capture register of fifo full pio
 
+# clear pio?
+movi r10, 0
+stb r10, 0(r8)
+
 movia r10, fifo_full_flag
 stb r9, 0(r10)         # set sample done flag to edge capture register value
-
-# clear pio?
 
 movi r8, 0x1
 stbio r8, 8(r9)        # interrupt mask register, enable interrupts? in sample done?
