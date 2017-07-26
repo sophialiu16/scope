@@ -274,13 +274,13 @@ movia r11, data_buffer    # get address of data buffer shared variable
 addi r13, r11, NUM_SAMPLES # get address of last sample in data buffer
 
 read_fifo_loop:
-ldb r11, 0(r10)            # read current sample from fifo
-stb r11, 0(r11)            # store sample in data buffer
+ldb r12, 0(r10)            # read current sample from fifo
+stb r12, 0(r11)            # store sample in data buffer
 addi r11, r11, 1           # go to next address in data buffer
 
 bge r11, r13, got_sample   # if at address of last sample in data buffer,
                            #     finished reading samples from fifo
-# blt r12, r13, read_fifo_loop_next # otherwise, continue loop
+# blt r11, r13, read_fifo_loop_next # otherwise, continue loop
 
 read_fifo_loop_next:       # clock out next sample from fifo
 movi r9, 0
@@ -410,31 +410,6 @@ movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
 stb r9, 0(r8)    # disable triggering by writing to trigger enable pio
 
-movi r9, 0x1
-stb r9, 4(r8)   # direction register, set trigger enable to output
-
-movia r8, AUTO_TRIGGER_PIO
-movi r9, 1
-stb r9, 4(r8)   # direction register, set auto trigger to output
-
-movia r8, TRIGGER_SLOPE_PIO
-movi r9, 1
-stb r9, 4(r8)   # direction register, set trigger slope to output
-
-movia r8, SAMPLE_DELAY_PIO
-movhi r9, %hi(65535)
-ori r9, r9, %lo(65535)         # set all 16 bits to output direction
-stw r9, 4(r8)                  # direction register, set sample delay to output
-
-movia r8, TRIGGER_LEVEL_PIO
-movi r9, 255                   # set all 8 bits to output direction
-stw r9, 4(r8)                  # direction register, set trigger level to output
-
-movia r8, SAMPLE_RATE_PIO
-movhi r9, %hi(524287)
-ori r9, r9, %lo(524287)        # set all 19 bits to output direction
-stw r9, 4(r8)                  # direction register, set sample delay to output
-
 init_fifo_int:
 movui r4, 1 # FIFO_FULL_IRQ      # arguments for alt_irq_register
 movui r5, 0
@@ -442,8 +417,8 @@ movia r6, fifo_full_eh
 call alt_irq_register        # register fifo full interrupt
 
 movia r8, FIFO_FULL_PIO     # get pio core address
-movi r9, 0x0
-stbio r9, 4(r8)   # direction register, set to input
+#movi r9, 0x0
+#stbio r9, 4(r8)   # direction register, set to input
 
 movi r9, 0x0
 stbio r9, 12(r8)   # edge capture register, clear all
