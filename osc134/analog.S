@@ -209,8 +209,11 @@ movia r8, AUTO_TRIGGER_PIO
 stb r4, 0(r8)                 # write auto triggering argument to pio core
 
 movia r8, TRIGGER_ENABLE_PIO
+movi r9, FALSE
+stb r9, 0(r8)
+
 movi r9, TRUE
-stb r9, 0(r8)     # enable triggering by writing to trigger enable pio
+stb r9, 0(r8)     # enable triggering by pulsing trigger enable pio
 
 movia r8, sample_done_flag
 movi r9, FALSE
@@ -295,6 +298,10 @@ got_sample:
 movia r8, sample_done_flag
 movi r9, TRUE
 stb r9, 0(r8)            # set sample done flag to true - completed sample
+
+movia r8, TRIGGER_ENABLE_PIO
+movi r9, FALSE
+stb r9, 0(r8)                 # stop sampling (?)
 
 movia r2, data_buffer    # return pointer to sampled data
 ret
