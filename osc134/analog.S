@@ -80,7 +80,7 @@ divu r9 , r8, r4         # divide clock frequency by sample rate for sample numb
 mov r2, r9
 
 movia r8, SAMPLE_RATE_PIO # get address of sample rate pio
-stw r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
+stwio r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
 
 ret
 
@@ -120,10 +120,10 @@ ret
 .type set_trigger, @function
 set_trigger:
 movia r8, TRIGGER_LEVEL_PIO
-stb r4, 0(r8)    # write level argument to trigger level pio
+stbio r4, 0(r8)    # write level argument to trigger level pio
 
 movia r8, TRIGGER_SLOPE_PIO
-stb r5, 0(r8)    # write slope argument to trigger slope pio
+stbio r5, 0(r8)    # write slope argument to trigger slope pio
 
 ret
 
@@ -161,7 +161,7 @@ ret
 .type set_delay, @function
 set_delay:
 movia r8, SAMPLE_DELAY_PIO
-stw r4, 0(r8)    # write delay argument to delay pio core
+stwio r4, 0(r8)    # write delay argument to delay pio core
 # convert delay to samples? DELAY SIZE?
 ret
 
@@ -203,21 +203,21 @@ start_sample:
 # clear fifo/fifo full flag?
 movia r8, fifo_full_flag
 movi r9, FALSE
-stb r9, 0(r8)                 # store false in fifo full flag
+stbio r9, 0(r8)                 # store false in fifo full flag
 
 movia r8, AUTO_TRIGGER_PIO
-stb r4, 0(r8)                 # write auto triggering argument to pio core
+stbio r4, 0(r8)                 # write auto triggering argument to pio core
 
 movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
-stb r9, 0(r8)
+stbio r9, 0(r8)
 
 movi r9, TRUE
-stb r9, 0(r8)     # enable triggering by pulsing trigger enable pio
+stbio r9, 0(r8)     # enable triggering- pulse trigger enable pio and set high
 
 movia r8, sample_done_flag
 movi r9, FALSE
-stb r9, 0(r8)     # reset sample done flag - only after each start_sample call
+stbio r9, 0(r8)     # reset sample done flag - only after each start_sample call
 ret
 
 # sample done
@@ -277,7 +277,7 @@ movia r11, data_buffer    # get address of data buffer shared variable
 addi r13, r11, NUM_SAMPLES # get address of last sample in data buffer
 
 read_fifo_loop:
-ldb r12, 0(r10)            # read current sample from fifo
+ldbio r12, 0(r10)          # read current sample from fifo
 stb r12, 0(r11)            # store sample in data buffer
 addi r11, r11, 1           # go to next address in data buffer
 
@@ -287,7 +287,7 @@ bge r11, r13, got_sample   # if at address of last sample in data buffer,
 
 read_fifo_loop_next:       # clock out next sample from fifo
 movi r9, 0
-stb r9, 0(r8) # TODO unnecessary?
+stb r9, 0(r8)
 movi r9, 1
 stb r9, 0(r8)
 movi r9, 0
@@ -301,7 +301,7 @@ stb r9, 0(r8)            # set sample done flag to true - completed sample
 
 movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
-stb r9, 0(r8)                 # stop sampling (?)
+stbio r9, 0(r8)                 # stop sampling (?)
 
 movia r2, data_buffer    # return pointer to sampled data
 ret
@@ -348,17 +348,15 @@ stw r28, 0(sp)         # store frame pointer
 
 # read from fifo pio
 movia r8, FIFO_FULL_PIO
-ldb r9, 12(r8)         # read from edge capture register of fifo full pio
-
-# clear pio?
-movi r10, 0
-stb r10, 0(r8)
-
 movia r10, fifo_full_flag
-stb r9, 0(r10)         # set sample done flag to edge capture register value
+ldbio r9, 12(r8)         # read from edge capture register of fifo full pio
+stb r9, 0(r10)           # set sample done flag to edge capture register value
 
-movi r8, 0x1
-stbio r8, 8(r9)        # interrupt mask register, enable interrupts? in sample done?
+movi r10, 0              # clear pio
+stbio r10, 0(r8)
+
+movi r10, 1
+stbio r10, 8(r8)         # interrupt mask register, enable interrupts? in sample done?
 
 # other settings?
 
@@ -415,7 +413,7 @@ stb r9, 0(r8)            # set sample done flag to false (?)
 init_pios:
 movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
-stb r9, 0(r8)    # disable triggering by writing to trigger enable pio
+stbio r9, 0(r8)    # disable triggering by writing to trigger enable pio
 
 init_fifo_int:
 movui r4, 1 # FIFO_FULL_IRQ      # arguments for alt_irq_register
@@ -424,13 +422,10 @@ movia r6, fifo_full_eh
 call alt_irq_register        # register fifo full interrupt
 
 movia r8, FIFO_FULL_PIO     # get pio core address
-#movi r9, 0x0
-#stbio r9, 4(r8)   # direction register, set to input
-
-movi r9, 0x0
+movi r9, 0
 stbio r9, 12(r8)   # edge capture register, clear all
 
-movi r9, 0x1
+movi r9, 1
 stbio r9, 8(r8)    # interrupt mask register, enable interrupts
 
 ldw ra, 0(sp)          # load return address
