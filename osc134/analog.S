@@ -201,9 +201,9 @@ ret
 .type start_sample, @function
 start_sample:
 # clear fifo/fifo full flag?
-movia r8, fifo_full_flag
-movi r9, FALSE
-stbio r9, 0(r8)                 # store false in fifo full flag
+#movia r8, fifo_full_flag
+#movi r9, FALSE
+#stbio r9, 0(r8)                 # store false in fifo full flag
 
 movia r8, AUTO_TRIGGER_PIO
 stbio r4, 0(r8)                 # write auto triggering argument to pio core
@@ -264,8 +264,8 @@ beq r10, r8, return_null_ # If the flag is true, the sample is already done,
 # bne r10, r8, check_fifo # Else flag is false, check if fifo is full
 
 check_fifo:
-movia r9, fifo_full_flag
-ldb r10, 0(r9)           # get fifo full flag from shared variable
+movia r9, FIFO_FULL_PIO # fifo_full_flag
+ldbio r10, 0(r9)           # get fifo full flag from shared variable
 bne r10, r8, return_null_ # If the flag is not true, fifo is not full,
                          #     return null.
 # beq r10, r8, return_pointer # Else flag is true, fifo is full, return pointer
@@ -287,11 +287,11 @@ bge r11, r13, got_sample   # if at address of last sample in data buffer,
 
 read_fifo_loop_next:       # clock out next sample from fifo
 movi r9, 0
-stb r9, 0(r8)
+stbio r9, 0(r8)
 movi r9, 1
-stb r9, 0(r8)
+stbio r9, 0(r8)
 movi r9, 0
-stb r9, 0(r8)              # pulse read clock for fifo
+stbio r9, 0(r8)              # pulse read clock for fifo
 jmpi read_fifo_loop        # go back to top of loop to read next sample
 
 got_sample:
@@ -352,8 +352,8 @@ movia r10, fifo_full_flag
 ldbio r9, 12(r8)         # read from edge capture register of fifo full pio
 stb r9, 0(r10)           # set sample done flag to edge capture register value
 
-movi r10, 0              # clear pio
-stbio r10, 0(r8)
+movi r10, 0              # clear edge capture register
+stbio r10, 12(r8)
 
 movi r10, 1
 stbio r10, 8(r8)         # interrupt mask register, enable interrupts? in sample done?
