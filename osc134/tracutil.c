@@ -1041,7 +1041,7 @@ void  plot_trace(unsigned char /*far*/ *sample)
     /* re-display the menu (if it was on) */
     refresh_menu();
 
-sample_size=512; //jank
+
     /* plot the sample */
     for (i = 0; i < sample_size; i++)  {
 

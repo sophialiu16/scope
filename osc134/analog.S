@@ -75,13 +75,12 @@
 set_sample_rate:
 movhi r8, %hi(CLOCK_FREQ)
 ori r8, r8, %lo(CLOCK_FREQ) # store 32 bit clock frequency constant into register
-divu r9 , r8, r4         # divide clock frequency by sample rate for sample number
-                         # store result in r2 to return
-mov r2, r9
+divu r9 , r8, r4            # divide clock frequency by sample rate for sample number
 
-movia r8, SAMPLE_RATE_PIO # get address of sample rate pio
-stwio r2, 0(r8)            # drive sample rate argument on sample rate pio output (byte?)
+movia r8, SAMPLE_RATE_PIO   # get address of sample rate pio
+stwio r9, 0(r8)             # drive sample rate argument on sample rate pio output (byte?)
 
+movi r2, NUM_SAMPLES        # always return set sample size (have a set fifo size)
 ret
 
 # set trigger
@@ -264,7 +263,7 @@ beq r10, r8, return_null_ # If the flag is true, the sample is already done,
 # bne r10, r8, check_fifo # Else flag is false, check if fifo is full
 
 check_fifo:
-movia r9, FIFO_FULL_PIO # fifo_full_flag
+movia r9, FIFO_FULL_PIO# fifo_full_flag
 ldbio r10, 0(r9)           # get fifo full flag from shared variable
 bne r10, r8, return_null_ # If the flag is not true, fifo is not full,
                          #     return null.
