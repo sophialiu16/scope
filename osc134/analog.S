@@ -119,6 +119,8 @@ ret
 .type set_trigger, @function
 set_trigger:
 movia r8, TRIGGER_LEVEL_PIO
+muli r4, r4, 2     # multiply to get a range of 0 to 254,
+                   #     to match 8 bit adc data range
 stbio r4, 0(r8)    # write level argument to trigger level pio
 
 movia r8, TRIGGER_SLOPE_PIO
@@ -257,16 +259,16 @@ sample_done:
 movi r8, TRUE
 
 movia r9, sample_done_flag
-ldb r10, 0(r9)           # get sample done flag from shared variable
+ldb r10, 0(r9)            # get sample done flag from shared variable
 beq r10, r8, return_null_ # If the flag is true, the sample is already done,
-                         #     return null.
+                          #     return null.
 # bne r10, r8, check_fifo # Else flag is false, check if fifo is full
 
 check_fifo:
-movia r9, FIFO_FULL_PIO# fifo_full_flag
+movia r9, FIFO_FULL_PIO  #fifo_full_flag
 ldbio r10, 0(r9)           # get fifo full flag from shared variable
-bne r10, r8, return_null_ # If the flag is not true, fifo is not full,
-                         #     return null.
+bne r10, r8, return_null_  # If the flag is not true, fifo is not full,
+                           #     return null.
 # beq r10, r8, return_pointer # Else flag is true, fifo is full, return pointer
 
 return_pointer: # copy fifo into data buffer
@@ -301,6 +303,10 @@ stb r9, 0(r8)            # set sample done flag to true - completed sample
 movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
 stbio r9, 0(r8)                 # stop sampling (?)
+
+#movia r8, fifo_full_flag
+#movi r9, FALSE
+#stb r9, 0(r8)            # set fifo full flag to false
 
 movia r2, data_buffer    # return pointer to sampled data
 ret
@@ -348,7 +354,7 @@ stw r28, 0(sp)         # store frame pointer
 # read from fifo pio
 movia r8, FIFO_FULL_PIO
 movia r10, fifo_full_flag
-ldbio r9, 12(r8)         # read from edge capture register of fifo full pio
+ldbio r9, 0(r8)         # read from edge capture register of fifo full pio
 stb r9, 0(r10)           # set sample done flag to edge capture register value
 
 movi r10, 0              # clear edge capture register
@@ -402,8 +408,9 @@ stw r28, 4(sp)         # store frame pointer
 # clear fifo?
 # set_flags_analog:
 movia r8, fifo_full_flag
-movi r9, FALSE
-stb r9, 0(r8)            # set fifo full flag to false
+movia r10, FIFO_FULL_PIO
+ldbio r9, 0(r10)
+stb r9, 0(r8)            # set fifo full flag to current fifo status
 
 movia r8, sample_done_flag
 movi r9, FALSE

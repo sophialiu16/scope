@@ -57,7 +57,7 @@
 #define  MIN_DELAY	   0    /* minimum trigger delay */
 #define  MAX_DELAY     50000    /* maximum trigger delay */
 #define  MIN_LEVEL         0    /* minimum trigger level (in mV) */
-#define  MAX_LEVEL      5000    /* maximum trigger level (in mV) */
+#define  MAX_LEVEL      3800    /* maximum trigger level (in mV) */
 
 /* sampling parameters */
 #define  MAX_SAMPLE_SIZE   2400 /* maximum size of a sample (in samples) */
