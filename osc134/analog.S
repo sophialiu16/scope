@@ -201,11 +201,6 @@ ret
 .global start_sample
 .type start_sample, @function
 start_sample:
-# clear fifo/fifo full flag?
-#movia r8, fifo_full_flag
-#movi r9, FALSE
-#stbio r9, 0(r8)                 # store false in fifo full flag
-
 movia r8, AUTO_TRIGGER_PIO
 stbio r4, 0(r8)                 # write auto triggering argument to pio core
 
@@ -265,13 +260,13 @@ beq r10, r8, return_null_ # If the flag is true, the sample is already done,
 # bne r10, r8, check_fifo # Else flag is false, check if fifo is full
 
 check_fifo:
-movia r9, FIFO_FULL_PIO  #fifo_full_flag
-ldbio r10, 0(r9)           # get fifo full flag from shared variable
+movia r9, FIFO_FULL_PIO  
+ldbio r10, 0(r9)           # check to see if the fifo is full 
 bne r10, r8, return_null_  # If the flag is not true, fifo is not full,
                            #     return null.
 # beq r10, r8, return_pointer # Else flag is true, fifo is full, return pointer
 
-return_pointer: # copy fifo into data buffer
+return_pointer:           # copy fifo into data buffer
 movia r8, DATA_READY_PIO  # get address for fifo read clock
 movia r10, FIFO_DATA_PIO  # address to read fifo data from
 movia r11, data_buffer    # get address of data buffer shared variable
@@ -304,70 +299,11 @@ movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
 stbio r9, 0(r8)                 # stop sampling (?)
 
-#movia r8, fifo_full_flag
-#movi r9, FALSE
-#stb r9, 0(r8)            # set fifo full flag to false
-
 movia r2, data_buffer    # return pointer to sampled data
 ret
 
 return_null_:
 movi r2, PTRNL     # return null?
-ret
-
-# analog eh
-#
-#
-# Description: Handles interrupts for the fifo full interrupt.
-#
-# Operation:
-#
-# Arguments:         None.
-# Return Values:     None.
-#
-# Local Variables:   None.
-# Shared Variables:  None.
-# Global Variables:  None.
-#
-# Input:             None.
-# Output:            None.
-#
-# Error Handling:    None.
-# Algorithms:        None.
-# Data Structures:   None.
-#
-# Known Bugs:        None.
-# Limitations:       None.
-# Registers changed:
-# Stack depth:
-#
-# Revision History: 06/24/17   Sophia Liu      initial revision
-.section .text
-.align 4
-.global fifo_full_eh
-.type fifo_full_eh, @function
-fifo_full_eh:
-addi sp, sp, -8        # adjust stack pointer
-stw ra, 4(sp)          # store return address
-stw r28, 0(sp)         # store frame pointer
-
-# read from fifo pio
-movia r8, FIFO_FULL_PIO
-movia r10, fifo_full_flag
-ldbio r9, 0(r8)         # read from edge capture register of fifo full pio
-stb r9, 0(r10)           # set sample done flag to edge capture register value
-
-movi r10, 0              # clear edge capture register
-stbio r10, 12(r8)
-
-movi r10, 1
-stbio r10, 8(r8)         # interrupt mask register, enable interrupts? in sample done?
-
-# other settings?
-
-ldw r28, 0(sp)         # load frame pointer
-ldw ra, 4(sp)          # load return address
-addi sp, sp, 8         # adjust stack pointer
 ret
 
 # init analog
@@ -406,11 +342,6 @@ addi sp, sp, -8        # adjust stack pointer
 stw ra, 0(sp)          # store return address
 stw r28, 4(sp)         # store frame pointer
 # clear fifo?
-# set_flags_analog:
-movia r8, fifo_full_flag
-movia r10, FIFO_FULL_PIO
-ldbio r9, 0(r10)
-stb r9, 0(r8)            # set fifo full flag to current fifo status
 
 movia r8, sample_done_flag
 movi r9, FALSE
@@ -421,18 +352,6 @@ movia r8, TRIGGER_ENABLE_PIO
 movi r9, FALSE
 stbio r9, 0(r8)    # disable triggering by writing to trigger enable pio
 
-init_fifo_int:
-movui r4, 1 # FIFO_FULL_IRQ      # arguments for alt_irq_register
-movui r5, 0
-movia r6, fifo_full_eh
-call alt_irq_register        # register fifo full interrupt
-
-movia r8, FIFO_FULL_PIO     # get pio core address
-movi r9, 0
-stbio r9, 12(r8)   # edge capture register, clear all
-
-movi r9, 1
-stbio r9, 8(r8)    # interrupt mask register, enable interrupts
 
 ldw ra, 0(sp)          # load return address
 ldw r28, 4(sp)         # load frame pointer
@@ -442,9 +361,6 @@ ret
 # data section
 .section .data
 .align 4
-fifo_full_flag: .byte 0x0    # 1 byte boolean. TRUE if the fifo is full,
-                             #     FALSE otherwise.
-
 sample_done_flag:  .byte 0x0 # 1 byte boolean. TRUE if the sample is done,
                              #     FALSE otherwise.
 

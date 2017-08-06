@@ -1,6 +1,6 @@
 /****************************************************************************/
 /*                                                                          */
-/*                                GENERAL.H     v                           */
+/*                                GENERAL.H                                 */
 /*                           General Definitions                            */
 /*                               Include File                               */
 /*                       Digital Oscilloscope Project                       */
@@ -46,9 +46,8 @@
 
 // interrupt definitions
 #define ROT_IRQ       0
-#define FIFO_FULL_IRQ_ 1
 
-#define  PTRNL       0 // idk if this is right
+#define  PTRNL       0 
 #define  FALSE       0
 #define  TRUE        !FALSE
 
