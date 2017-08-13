@@ -118,5 +118,7 @@ void  set_delay(long int);		/* set the trigger delay time */
 void                start_sample(int);	/* capture a sample */
 unsigned char *sample_done(void);	/* sample captured status */
 
+/* watchdog input functions */ 
+void  pulse_wd(void);    /* pulse watchdog input on reset chip */ 
 
 #endif

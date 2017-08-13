@@ -108,7 +108,7 @@ int  main()
         {  menu_right,  no_action   },   /* <Right>     */
         {  no_action,   no_action   } }; /* illegal key */
 
-
+    pulse_wd(); /* pulse watchdog reset input */
 
     /* first initialize everything */
     clear_display();		/* clear the display */
@@ -123,12 +123,12 @@ int  main()
 
     /* infinite loop processing input */
     while(TRUE)  {
+        pulse_wd(); /* pulse watchdog reset input */
 
         /* check if ready to do a trace */
 	if (trace_rdy())
 	    /* ready for a trace - do it */
 	    do_trace();
-
 
 	/* check if have a trace to display */
 	if (is_sampling() && ((sample = sample_done()) != NULL))  {
@@ -138,7 +138,6 @@ int  main()
 	    /* done processing this trace */
 	    trace_done();
 	}
-
 
 	/* now check for keypad input */
 	if (key_available())  {
