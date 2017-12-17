@@ -210,7 +210,15 @@ The user can change the scope configuration via two rotary encoders (seen in \re
 	1-2 pages of text
 \end{comment}
 % BLOCK DIAGRAM
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/blockmain.png}}
+	\caption{Block diagram overview of FPGA and peripheral chips.} 
+	\label{Block:main}    
+\end{fullfigure}
 % BOARD LAYOUT
+
+
 % MEMORY MAP
 The oscilloscope system is centered around a Cyclone III FPGA, which includes a Nios II CPU and controllers for the VRAM, LCD, rotary encoders, and analog input and triggering. Upon startup, the bitmap %TODO is it a bitmap???
 is loaded from the serial EEPROM. The %SOFTWARE? 
@@ -219,45 +227,99 @@ is then loaded from the ROM.
 \marginlabel{Receiving a Signal:} When the probe is connected to a desired input, the analog signal is sent to an Analog to Digital Converter chip. 8 bits of data are then sent in parallel to the FPGA to an analog controller. The various trigger setting inputs (auto triggering, trigger enable, trigger slope, trigger level) are used along with the 8 bit signal to determine if the system should begin sampling. Once triggering has occurred, the signal is written to a %SIZE, 512 
 FIFO buffer at the sampling rate. Once the FIFO is full, the CPU clocks out and stores the buffer data to be displayed. 
 
-\marginlabel{Displaying a Signal:} In order to display the signal on the LCD, data is written to the VRAM, which is then sent out to the LCD. Several control signals (write enable, chip select, address, wait) are sent from the CPU to the VRAM controller to perform read and write operations on the VRAM. A (moore??) state machine is used to generate 
+\marginlabel{Displaying a Signal:} In order to display the signal on the LCD, data is written to the VRAM, which is then sent out to the LCD. Several control signals (write enable, chip select, address, wait) are sent from the CPU to the VRAM controller to perform read and write operations on the VRAM. A state machine is used to generate 
+
+\subsubsection{FPGA} \index{FPGA}%HERE? idk. talk about controllers 
+An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. The schematics can be seen in Figure~\ref{}.
+
+%level shifters / buffers 
+Buffers, or level shifters, were used to connect the buses and control signals from the peripheral chips to the FPGA to go between the low FPGA voltage and mainly 5V environment (U5, U6, U7, U8, U10, U12; 74LVT16245). A separate buffer was used to interface with the ADC (U17, TLC5510A), which had a larger input voltage range requirement (U18, SN74HCT240).
+
+% pinout 
+\marginlabel{pin assignments:} The pins were connected on the PCB as listed in Figure~\ref{}. 
+%pinout doc
+
+The final product included several changes. Pin 162, an output for device configuration, was left floating, and the reset input was changed to Pin 187. One buffer was also left unusable, resulting in rewiring to extra I/O pins. 
+%pinout excel
+
+%logic 
+\marginlabel{logic:} A CPU and several controllers were programmed into the FPGA, as seen in Figure~\ref{Block:main}. These will be discussed in greater detail in their respective subsections. 
+
+% block diagram
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/CPU.png}}
+	\caption{The main FPGA block diagram with the CPU, inputs and outputs, and controllers.} 
+	\label{Block:CPU}    
+\end{fullfigure}
+%TODO more??
 
 \subsubsection{Power} \index{Power} \label{subsec:Power}
-%TODO REFERENCE SCHEMATIC 
-A din4 connector (PWR1) is used to supply the board with +/-12 V and 5 V. All chips are locally bypassed (...?)
+A din4 connector (PWR1) is used to supply the board with +/-12 V and 5 V. All chips are locally bypassed.
 
 5 V is used to power the reset, VRAM, SRAM, ROM, and ADC chips. 
+Several LM1086 regulators are used to generate the other required voltages. Specifically, U14 uses the 5 V supply to generate 2.5 V for analog power to the FPGA PLLs, and U15 uses the 5 V supply to generate 1.2 V for FPGA power supply and digital power to the FPGA PLLs. U16 generates 3.3 V from 5 V, which is used to power the FPGA I/O supply pins, buffers, JTAG, serial configuration device, clock, and for pulling high the rotary encoder outputs.
 
-Several LM1086 regulators are used to generate the other required voltages. Specifically, U14 uses the 5 V supply to generate 2.5 V for analog power to the FPGA PLLs, and U15 uses the 5 V supply to generate 1.2 V for FPGA power supply and digital power to the FPGA PLLs. U16 generates 3.3 V from 5 V, which is used to power the FPGA I/O supply pins, buffers, JTAG, serial configuration device, clock, and for pulling high the rotary encoders. (??) 
+Regulators also generate 5 V from 12 V (U24) and 4 V from 5 V (U23) for ADC reference voltages. The main power schematics can be seen in Figure~\ref{}.
 
-Regulators also generate 5 V from 12 V (U24) and 4 V from 5 V (U23) for ADC reference voltages. (more analog stuff in analog section?) 
+A boost converter is used to generate the 25 V necessary for the LCD backlight. U21 (AP3012) steps up from 5 V and outputs 25 V.
 
-A boost converter is used to generate the 25 V necessary for the LED backlight. U21 (part number AP3012) steps up from 5 V and outputs 25 V. (more detail? was used because?)
+% boost converter 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.9\textwidth]{{data/LCD_power.png}}
+	\caption{Boost converter circuit for LCD backlight power supply.} 
+	\label{Schematic:LCDpower}    
+\end{fullfigure}
 
 \subsubsection{Analog System}\index{Analog!Hardware} \label{subsec:AnalogHardware}
 The analog input can range from 0 to 4 V. An analog-to-digital converter (U17, TLC5510A) was used to digitize the input signal to 8 bits. This was chosen because of the simplicity of the circuit needed in order to meet the 0-3 V requirement.
 
-Several analog supply voltages were used to isolate the analog and digital circuitry. An external 4 V analog reference was generated and used for a 0-4 V range for the input signal. A 5 V analog supply voltage was also required, along with an analog ground reference connected to digital ground through an inductor. %TODO schematic 
+Several analog supply voltages were used to isolate the analog and digital circuitry. An external 4 V analog reference was generated and used for a 0-4 V range for the input signal. A 5 V analog supply voltage was also required, along with an analog ground reference connected to digital ground through a power inductor (Part L2, Figure~\ref{}). 
+
+% pins
+%TODO 
+data bus, oe, clock 
+
+% schematics
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/ADC.png}}
+	\caption{ADC circuit schematic.} 
+	\label{Schematic:ADC}    
+\end{fullfigure}
 
 \marginlabel{Analog logic:}
 \index{Analog!Logic}
+The analog controller consists of a trigger controller to determine when a trigger has occurred, along with logic for storing the signal at the specified sampling rate. If a trigger occurs, or if the auto triggering times out, the signal is stored in a FIFO buffer to be clocked out and displayed. 
 
-\marginlabel{Analog inputs:}
-Several values are taken as outputs from the software and are used in the hardware logic. Specifically, an 8 bit trigger level, 1 bit auto triggering, 1 bit trigger slope, 1 bit trigger enable, 19 bit sampling rate, and 16 bit trigger delay are used.  
-%TODO blocks quartus pic
+% block diagram
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Analog_Controller.png}}
+	\caption{Analog controller block diagram.} 
+	\label{Block:Analog}    
+\end{fullfigure}
 
-%TODO quartus pics
+\marginlabel{Analog input settings:}
+Several values are taken as outputs from the CPU and are used in the hardware logic. Specifically, an 8 bit trigger level, 1 bit auto triggering, 1 bit trigger slope, 1 bit trigger enable, 19 bit sampling rate, and 16 bit trigger delay signal are used as set by the user. 
+
 \marginlabel{Trigger logic:} \index{Trigger}
 First, the system determines whether or not a trigger has occurred.
-A Moore state machine is used to determine whether or not a trigger has occurred. It sets the the trigger event signal high when the trigger slope is positive and the signal has transitioned from below to above the trigger level, or if the trigger slope is negative and the signal has transitioned from above to below the trigger level. The code can be found in Appendix~\ref{scopetrig.vhd}.%TODO different way of quoting code??
+A Moore state machine (the ScopeTrigger block in Figure~\ref{Block:Analog}) is used to determine whether or not a trigger has occurred. The trigger event output is set high when the trigger slope is positive and the signal has transitioned from below to above the trigger level, or if the trigger slope is negative and the signal has transitioned from above to below the trigger level. The logic description can be found at Appendix~\ref{scopetrig.vhd}.%TODO
 
-Thus, the 8-bit signal is compared to the trigger level, and the less than and equal to outputs are sent to the trigger state machine along with the trigger slope. 
+In order to do this, the 8-bit signal is compared to the trigger level in lpm\_compare0 in Figure~\ref{Block:Analog}, and the outputs are sent to the trigger state machine.
 
 \index{Trigger!Autotrigger} 
-The system also generates a trigger event if auto trigger is enabled after 512 clocks, which was arbitrarily chosen as a short amount of time. %TODO chosen because? maybe better to set auto trigger to # samples
+\marginlabel{Autotriggering:} The system also generates a trigger event after 512 clocks if auto trigger is enabled, which was arbitrarily chosen as a short amount of time. Future designs may be improved by correlating the auto trigger countdown to the number of samples and the sampling rate.
 
-A counter and comparator are used to create a clock at the given sampling rate. Once a trigger event has occurred, another counter and comparator are used to create the trigger delay. The signal is then written into a FIFO buffer at the sampling rate, which is clocked out through the software when it is full. The FIFO has a size of 480 words, or the length of the LCD. 
+An SRFF is set once a trigger event has occurred, and the controller is reset to wait for another trigger event when the trigger enable signal is disabled and re-enabled (set low then high).  
 
-%TODO describe reasons
+\marginlabel{FIFO buffer storage:} \index{FIFO} A FIFO buffer is used to store the signal once a trigger event has occurred (DCFIFO in Figure ~\ref{Block:Analog}). The FIFO has a size of 480 (the width of the LCD) x 8 bits of data. Once a trigger event has occurred, a counter and comparator are used to create the trigger delay, and an SRFF is set once the delay has been reached to enable writing to the FIFO. A counter and comparator are used to create a clock at the given sampling rate, which is sent to the write clock of the FIFO. The signal is then written into a FIFO buffer at the sampling rate once the trigger delay has finished, and is clocked out by the CPU when it is full. 
+
+\marginlabel{Analog outputs:} As seen in Figure ~\ref{Block:Analog}, the Fifo\_full signal indicates when the FIFO is full and the sample has been stored, the Fifo\_data bus contains the stored signal data. The Fifo\_data\_ready input is controlled by the CPU, which sends the clock necessary to read out the signal from the data bus.
+
+The ADC clock (ADC\_clk) is also outputted from the controller to the ADC. It is is half the 24 MHz system clock (or a 12 MHz clock) because of the maximum ADC conversion rate, which is 20 M samples per second.
 
 \subsubsection{Rotary Encoders}\index{Rotary Encoders} \label{subsec:Rotary}%TODO reorder? 
 Two rotary encoders are used for the user input. %TODO pics 
@@ -415,26 +477,8 @@ A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used
 	\label{Schematic:EEPROM}    
 \end{fullfigure}
 
-
-\subsubsection{FPGA} \index{FPGA}%HERE? idk. talk about controllers 
-An Altera Cyclone III FPGA was used (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. 
-
-%level shifters / buffers 
-Buffers, or level shifters, were used to connect the buses and control signals from the peripheral chips to the FPGA to go between the low FPGA voltage and mainly 5V environment (U5, U6, U7, U8, U10, U12, 74LVT16245). A separate buffer was used to interface with the ADC (U17, TLC5510A), which had a larger input voltage range requirement (U18, SN74HCT240).
-
-% pinout 
-The pins were connected on the PCB as listed in Figure~\ref{}. 
-%pinout doc
-
-The final product included several changes. Pin 162, an output for device configuration, was left floating, and the reset input was changed to Pin 187. One buffer was also left unusable, resulting in rewiring to extra I/O pins. 
-%pinout excel
-
 \subsubsection{JTAG, Reset, and Clock} \index{Clock} \index{JTAG} \index{Reset} 
 % separate? 
-
-
-pin 162 used during FPGA startup, can't use for reset 
-
 \marginlabel{JTAG:} \index{Reset}
 
 \marginlabel{Reset:} \index{Reset}
