@@ -217,7 +217,19 @@ The user can change the scope configuration via two rotary encoders (seen in \re
 	\label{Block:main}    
 \end{fullfigure}
 % BOARD LAYOUT
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout.png}}
+	\caption{Board Layout.} 
+	\label{Layout:main}    
+\end{fullfigure}
 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/PCB.png}}
+	\caption{Image of PCB.} 
+	\label{PCB}    
+\end{fullfigure}
 
 % MEMORY MAP
 The oscilloscope system is centered around a Cyclone III FPGA, which includes a Nios II CPU and controllers for the VRAM, LCD, rotary encoders, and analog input and triggering. Upon startup, the bitmap %TODO is it a bitmap???
@@ -227,23 +239,30 @@ is then loaded from the ROM.
 \marginlabel{Receiving a Signal:} When the probe is connected to a desired input, the analog signal is sent to an Analog to Digital Converter chip. 8 bits of data are then sent in parallel to the FPGA to an analog controller. The various trigger setting inputs (auto triggering, trigger enable, trigger slope, trigger level) are used along with the 8 bit signal to determine if the system should begin sampling. Once triggering has occurred, the signal is written to a %SIZE, 512 
 FIFO buffer at the sampling rate. Once the FIFO is full, the CPU clocks out and stores the buffer data to be displayed. 
 
-\marginlabel{Displaying a Signal:} In order to display the signal on the LCD, data is written to the VRAM, which is then sent out to the LCD. Several control signals (write enable, chip select, address, wait) are sent from the CPU to the VRAM controller to perform read and write operations on the VRAM. A state machine is used to generate 
+\marginlabel{Displaying a Signal:} In order to display the signal on the LCD, data is written to the VRAM, which is then sent out to the LCD. Several control signals (write enable, chip select, address, wait) are sent from the CPU to the VRAM controller to perform read and write operations on the VRAM. An LCD controller sends out the necessary control signals to display the signal. 
+
+% the other things 
 
 \subsubsection{FPGA} \index{FPGA}%HERE? idk. talk about controllers 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_FPGA.png}}
+	\caption{Board Layout: FPGA and buffers.} 
+	\label{Layout:FPGA}    
+\end{fullfigure}
+
 An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. The schematics can be seen in Figure~\ref{}.
 
 %level shifters / buffers 
 Buffers, or level shifters, were used to connect the buses and control signals from the peripheral chips to the FPGA to go between the low FPGA voltage and mainly 5V environment (U5, U6, U7, U8, U10, U12; 74LVT16245). A separate buffer was used to interface with the ADC (U17, TLC5510A), which had a larger input voltage range requirement (U18, SN74HCT240).
 
 % pinout 
-\marginlabel{pin assignments:} The pins were connected on the PCB as listed in Figure~\ref{}. 
-%pinout doc
+\marginlabel{Pin Assignments:} The pins were connected on the PCB as listed in Figure~\ref{}. 
+%pinout doc 
+%TODO
 
 The final product included several changes. Pin 162, an output for device configuration, was left floating, and the reset input was changed to Pin 187. One buffer was also left unusable, resulting in rewiring to extra I/O pins. 
 %pinout excel
-
-%logic 
-\marginlabel{logic:} A CPU and several controllers were programmed into the FPGA, as seen in Figure~\ref{Block:main}. These will be discussed in greater detail in their respective subsections. 
 
 % block diagram
 \begin{fullfigure} 
@@ -252,9 +271,22 @@ The final product included several changes. Pin 162, an output for device config
 	\caption{The main FPGA block diagram with the CPU, inputs and outputs, and controllers.} 
 	\label{Block:CPU}    
 \end{fullfigure}
+
+%logic 
+\marginlabel{Logic:} A CPU and several controllers were programmed into the FPGA, as seen in Figure~\ref{Block:main}. These will be discussed in greater detail in their respective subsections. 
+
 %TODO more??
 
 \subsubsection{Power} \index{Power} \label{subsec:Power}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_FPGA.png}}
+	\caption{Board Layout: Power circuitry.} 
+	\label{Layout:Power}    
+\end{fullfigure}
+%TODO schematics
+
 A din4 connector (PWR1) is used to supply the board with +/-12 V and 5 V. All chips are locally bypassed.
 
 5 V is used to power the reset, VRAM, SRAM, ROM, and ADC chips. 
@@ -273,13 +305,12 @@ A boost converter is used to generate the 25 V necessary for the LCD backlight. 
 \end{fullfigure}
 
 \subsubsection{Analog System}\index{Analog!Hardware} \label{subsec:AnalogHardware}
-The analog input can range from 0 to 4 V. An analog-to-digital converter (U17, TLC5510A) was used to digitize the input signal to 8 bits. This was chosen because of the simplicity of the circuit needed in order to meet the 0-3 V requirement.
-
-Several analog supply voltages were used to isolate the analog and digital circuitry. An external 4 V analog reference was generated and used for a 0-4 V range for the input signal. A 5 V analog supply voltage was also required, along with an analog ground reference connected to digital ground through a power inductor (Part L2, Figure~\ref{}). 
-
-% pins
-%TODO 
-data bus, oe, clock 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_ADC.png}}
+	\caption{Board Layout: Analog circuitry.} 
+	\label{Layout:Analog}    
+\end{fullfigure}
 
 % schematics
 \begin{fullfigure} 
@@ -288,6 +319,24 @@ data bus, oe, clock
 	\caption{ADC circuit schematic.} 
 	\label{Schematic:ADC}    
 \end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.8\textwidth]{{data/ADC_Buffer.png}}
+	\caption{Buffer for FPGA to ADC signals.} 
+	\label{Schematic:ADC_Buffer}    
+\end{fullfigure}
+
+% summary 
+\marginlabel{summary:} An analog signal is inputted through the BNC connector (P1). A jumper connector was used in case additional analog front end circuitry was created. The signal then passes through protection diodes and is sent to the ADC. The data is then sent through the buffers to the FPGA and analog controller, which stores the signal at the sampling rate once it has been triggered.
+
+% design decisions?
+\marginlabel{ADC:} The analog input can range from 0 to 4 V. An analog-to-digital converter (U17, TLC5510A) was used to digitize the input signal to 8 bits. This specific ADC was chosen because of the simplicity of the circuit needed in order to meet the 0-3 V requirement.
+
+% pins 
+The 8 bit data bus was connected to the CPU in parallel, and a clock input was generated from the analog controller. A separate buffer was required to meet the ADC input voltage requirements (U18 in Figure~\ref{Schematic:ADC_Buffer}). Protection diodes (D6, D7 in Figure~\ref{Schematic:ADC}) with a low forward voltage (about 0.2 V) were used to keep the analog input within the allowed input range. 
+
+Several analog supply voltages were used to isolate the analog and digital circuitry. An external 4 V analog reference was generated and used for a 0-4 V input signal range. A 5 V analog power supply was also required, along with an analog ground reference connected to digital ground through a power inductor (Part L2, Figure~\ref{}). 
 
 \marginlabel{Analog logic:}
 \index{Analog!Logic}
@@ -322,25 +371,79 @@ An SRFF is set once a trigger event has occurred, and the controller is reset to
 The ADC clock (ADC\_clk) is also outputted from the controller to the ADC. It is is half the 24 MHz system clock (or a 12 MHz clock) because of the maximum ADC conversion rate, which is 20 M samples per second.
 
 \subsubsection{Rotary Encoders}\index{Rotary Encoders} \label{subsec:Rotary}%TODO reorder? 
-Two rotary encoders are used for the user input. %TODO pics 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_Rotary.png}}
+	\caption{Board Layout: Rotary Encoders.} 
+	\label{Layout:Rotary}    
+\end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.5\textwidth]{{data/Rotary.png}}
+	\caption{Rotary encoders schematics.} 
+	\label{Schematics:Rotary}    
+\end{fullfigure}
+
+Two rotary encoders are used for the user input.
 These include and A and B output for the encoder and a single pull single throw push button switch. 
 
 Pins A and B are pulled high\footnote{1 K resistors were used in place of the 10 K resistors on the schematic because the voltage high output was too low for the buffers.}, while the common pin is grounded to create out-of-phase pulses from outputs A and B. 
 %TODO wave diagram
-%TODO schematic pics 
 
 
 \marginlabel{Rotary decoder logic:} 
-The rotary logic block consists of a debouncer for the push button and a decoder for the rotary encoder. %TODO debouncer, decoder pics 
 
-The debouncer (AnalogDebounce) takes as inputs the active-low button input (Rotary1\_P and Rotary2\_P on the schematic), clock, and active-low reset signal. It outputs a single active-high clock pulse whenever the button input signal is low for longer than 100000 clocks, which was chosen through testing the switches. 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/RotaryCPU.png}}
+	\caption{Connections between CPU and rotary controller.} 
+	\label{Block:RotaryCPU}    
+\end{fullfigure}
 
-The decoder (RotaryController) takes as inputs the two active-low outputs from the encoder (Rotary1\_A and Rotary1\_B, and Rotary2\_A and Rotary2\_B on the schematic), and the reset and clock signals, and outputs a single active-high clock pulse for each counter-clockwise turn of the rotary encoder, where output A leads B. %TODO a leading b/one ccw turn figure
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/RotaryBlock.png}}
+	\caption{Rotary controller.} 
+	\label{Block:Rotary}    
+\end{fullfigure}
 
-This is accomplished by first debouncing the input using a counter and comparator to eliminate glitches. Several DFFs are used in series in order to read inputs A and B from two consecutive clocks to determine when edges have occurred. An SRFF is set low when input B goes from low to high while input A is still low, and is set high otherwise. The inverse of this is returned as the output, resulting in a decoder for one direction. Two decoders are used for each rotary encoder to distinguish clockwise and counterclockwise turns. 
-%TODO more pics, of rotary block
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Debouncer.png}}
+	\caption{Debouncer for push button.} 
+	\label{Block:RotaryDebouncer}    
+\end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/RotaryController.png}}
+	\caption{Rotary decoder.} 
+	\label{Block:RotaryDecoder}    
+\end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.5\textwidth]{{data/RotaryCCWDecoder.png}}
+	\caption{Output of rotary decoder, counterclockwise turn.} 
+	\label{RotaryDecoderDiagram}    
+\end{fullfigure}
+\marginlabel{Summary:} The rotary logic block consists of a debouncer for the push button and a decoder for the rotary encoder. 
+
+The debouncer (Figure~\ref{Block:RotaryDebouncer}) takes as inputs the active-low button input (Rotary1\_P and Rotary2\_P on the schematic), clock, and active-low reset signal. It outputs a single active-high clock pulse whenever the button input signal is low for longer than 100000 clocks, which was chosen through testing the switches. 
+
+The decoder (Figure~\ref{Block:RotaryDecoder}) takes as inputs the two active-low outputs from the encoder (Rotary1\_A and Rotary1\_B, and Rotary2\_A and Rotary2\_B on the schematic), and the reset and clock signals, and outputs a single active-high clock pulse for each counter-clockwise turn of the rotary encoder, where output A leads B (Figure~\ref{RotaryDecoderDiagram}). 
+
+This is accomplished by first debouncing the input using a counter and comparator to eliminate glitches. Several DFFs are used in series in order to read inputs A and B from two consecutive clocks to determine when edges have occurred. An SRFF is set low when input B goes from low to high while input A is still low, and is set high otherwise. The inverse of this is returned as the output, resulting in a decoder for one direction. Two decoders are used for each rotary encoder to distinguish clockwise and counterclockwise turns (Figure~\ref{Block:Rotary}). 
 
 \subsubsection{VRAM and LCD}\index{VRAM}\index{LCD} \label{subsec:VRAMLCD}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_Display.png}}
+	\caption{Board Layout: Display.} 
+	\label{Layout:Display}    
+\end{fullfigure}
+
 Two 256Kx4 DRAM with 512x4 SAM (serial access memory) chips (U19, U22, MT42C4225) were used for a total of 8 bits of data, with a 480x272 RGB TFT LCD (Connector J2, ER-TFT043-3).
 %TODO schematic  pic
 
@@ -426,6 +529,14 @@ The timing diagrams can be found in Appendix~\ref{AP:Timing}, Figures~\ref{AP:LC
 \end{fullfigure}
 
 \subsubsection{Memory} \index{memory} \label{subsec:Memory}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_Memory.png}}
+	\caption{Board Layout: Memory.} 
+	\label{Layout:Memory}    
+\end{fullfigure}
+
 \marginlabel{Memory Map:} 
 %TODO explain? 
 \begin{fullfigure} 
@@ -477,8 +588,17 @@ A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used
 	\label{Schematic:EEPROM}    
 \end{fullfigure}
 
+See Section~\ref{subsec:VRAMLCD} for details on the VRAM. 
+
 \subsubsection{JTAG, Reset, and Clock} \index{Clock} \index{JTAG} \index{Reset} 
 % separate? 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_FPGAothers.png}}
+	\caption{Board Layout: Clock, JTAG, Reset.} 
+	\label{Layout:FPGAothers}    
+\end{fullfigure}
+
 \marginlabel{JTAG:} \index{Reset}
 
 \marginlabel{Reset:} \index{Reset}
