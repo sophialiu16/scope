@@ -273,7 +273,7 @@ The final product included several changes. Pin 162, an output for device config
 \end{fullfigure}
 
 %logic 
-\marginlabel{Logic:} A CPU and several controllers were programmed into the FPGA, as seen in Figure~\ref{Block:main}. These will be discussed in greater detail in their respective subsections. 
+\marginlabel{Logic:} A CPU and several controllers were programmed into the FPGA, as seen in Figure~\ref{Block:main}. These will be discussed in greater detail in their respective subsections. As seen in the main block diagram, the peripheral memory, user interface elements, and other elements all interact with the FPGA and its various controllers. The input signal and settings are sent to the CPU and the appropriate controllers, and the output data is sent from the CPU to be displayed on the LCD.
 
 %TODO more??
 
@@ -294,7 +294,7 @@ Several LM1086 regulators are used to generate the other required voltages. Spec
 
 Regulators also generate 5 V from 12 V (U24) and 4 V from 5 V (U23) for ADC reference voltages. The main power schematics can be seen in Figure~\ref{}.
 
-A boost converter is used to generate the 25 V necessary for the LCD backlight. U21 (AP3012) steps up from 5 V and outputs 25 V.
+A boost converter is used to generate the 25 V necessary for the LCD backlight. U21 (AP3012) steps up from 5 V and outputs 25 V  (Figure~\ref{Schematic:LCDpower}).
 
 % boost converter 
 \begin{fullfigure} 
@@ -302,6 +302,70 @@ A boost converter is used to generate the 25 V necessary for the LCD backlight. 
 	\includegraphics[width=0.9\textwidth]{{data/LCD_power.png}}
 	\caption{Boost converter circuit for LCD backlight power supply.} 
 	\label{Schematic:LCDpower}    
+\end{fullfigure}
+
+\subsubsection{Memory} \index{memory} \label{subsec:Memory}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_Memory.png}}
+	\caption{Board Layout: Memory.} 
+	\label{Layout:Memory}    
+\end{fullfigure}
+
+\marginlabel{Memory Map:} 
+%TODO explain? 
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.4\textwidth]{{data/memorymap.png}}
+	\caption{Memory map diagram} %used by the CPU(?)
+	\label{Block:Memorymap}    
+\end{fullfigure}
+
+Several types of storage were used, including ROM (U2) for permanent program storage, and a smaller amount of static RAM (U1) for storage including the data segment, stack, and heap. Video RAM (U19, U22), with dynamic RAM, which is cheaper and smaller than static RAM, and serial memory, was used for the display memory. A serial device (U4) was also used to store configuration data for the FPGA after powering on. 
+
+\marginlabel{ROM:} \index{ROM}
+1 512 K x 8 bit EEROM (U2, Am29F040) was used for program storage. %correct tense hell
+8 data bits are connected in parallel through the buffers to the CPU, along with 19 address bits, an active-low chip enable (CE), and output enable (OE) signal. The write enable (WE) signal was pulled up, as the ROM was written to with a dedicated ROM programmer.
+
+The ROM timing diagram for the read cycle can be seen at Appendix~\ref{AP:Timing}, Figure~\ref{AP:ROM_Read_Timing}. 3 read wait states were used. %is this the right way to say it?
+
+The executable file from the Nios II IDE was loaded into the ROM using a ROM programmer. 
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/ROM.png}}
+	\caption{ROM Schematic.}
+	\label{Schematic:ROM}    
+\end{fullfigure}
+
+%block diagram
+
+\marginlabel{SRAM:} \index{SRAM}
+1 128 K x 8 bit CMOS static RAM was used (U1, HM628128B) 
+
+The address line is shared between the ROM and SRAM, with only the 17 least significant bits used for RAM addressing. The 8-bit data bus is also shared between the ROM and SRAM. The active-low output enable (OE), write enable (WE), and chip select (CS1) are also connected between the SRAM and CPU, with the second active high chip select (CS2) pulled high as required by the read and write cycles. 
+
+The SRAM timing diagrams can be seen at Appendix~\ref{AP:Timing},
+Figures~\ref{AP:RAM_Read_Timing} and \ref{AP:RAM_Write_Timing}. 2 read wait states and 1 write wait state was used. 
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/SRAM.png}}
+	\caption{SRAM Schematic.}
+	\label{Schematic:SRAM}    
+\end{fullfigure}
+
+\marginlabel{VRAM:} See Section~\ref{subsec:VRAMLCD} for details on the VRAM.
+ 
+\marginlabel{Serial Device:} \index{Serial Device}
+A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used to store FPGA configuration data \footnote{Was unable to successfully use serial device for unknown reasons, possibly due to incorrect FPGA configurations.}.
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.75\textwidth]{{data/EEPROM.png}}
+	\caption{Serial Device Schematic.}
+	\label{Schematic:EEPROM}    
 \end{fullfigure}
 
 \subsubsection{Analog System}\index{Analog!Hardware} \label{subsec:AnalogHardware}
@@ -328,7 +392,7 @@ A boost converter is used to generate the 25 V necessary for the LCD backlight. 
 \end{fullfigure}
 
 % summary 
-\marginlabel{summary:} An analog signal is inputted through the BNC connector (P1). A jumper connector was used in case additional analog front end circuitry was created. The signal then passes through protection diodes and is sent to the ADC. The data is then sent through the buffers to the FPGA and analog controller, which stores the signal at the sampling rate once it has been triggered.
+\marginlabel{Summary:} An analog signal is inputted through the BNC connector (P1). A jumper connector was used in case additional analog front end circuitry was used. The signal then passes through protection diodes and is sent to the ADC. The data is then sent through the buffers to the FPGA and analog controller, which stores the signal at the sampling rate once it has been triggered.
 
 % design decisions?
 \marginlabel{ADC:} The analog input can range from 0 to 4 V. An analog-to-digital converter (U17, TLC5510A) was used to digitize the input signal to 8 bits. This specific ADC was chosen because of the simplicity of the circuit needed in order to meet the 0-3 V requirement.
@@ -355,7 +419,7 @@ Several values are taken as outputs from the CPU and are used in the hardware lo
 
 \marginlabel{Trigger logic:} \index{Trigger}
 First, the system determines whether or not a trigger has occurred.
-A Moore state machine (the ScopeTrigger block in Figure~\ref{Block:Analog}) is used to determine whether or not a trigger has occurred. The trigger event output is set high when the trigger slope is positive and the signal has transitioned from below to above the trigger level, or if the trigger slope is negative and the signal has transitioned from above to below the trigger level. The logic description can be found at Appendix~\ref{scopetrig.vhd}.%TODO
+A Moore state machine (the ScopeTrigger block in Figure~\ref{Block:Analog}) is used to determine whether or not a trigger has occurred. The trigger event output is set high when the trigger slope is positive and the signal has transitioned from below to above the trigger level, or if the trigger slope is negative and the signal has transitioned from above to below the trigger level. The logic description can be found at Appendix~\ref{scopetrig.vhd}.
 
 In order to do this, the 8-bit signal is compared to the trigger level in lpm\_compare0 in Figure~\ref{Block:Analog}, and the outputs are sent to the trigger state machine.
 
@@ -366,11 +430,11 @@ An SRFF is set once a trigger event has occurred, and the controller is reset to
 
 \marginlabel{FIFO buffer storage:} \index{FIFO} A FIFO buffer is used to store the signal once a trigger event has occurred (DCFIFO in Figure ~\ref{Block:Analog}). The FIFO has a size of 480 (the width of the LCD) x 8 bits of data. Once a trigger event has occurred, a counter and comparator are used to create the trigger delay, and an SRFF is set once the delay has been reached to enable writing to the FIFO. A counter and comparator are used to create a clock at the given sampling rate, which is sent to the write clock of the FIFO. The signal is then written into a FIFO buffer at the sampling rate once the trigger delay has finished, and is clocked out by the CPU when it is full. 
 
-\marginlabel{Analog outputs:} As seen in Figure ~\ref{Block:Analog}, the Fifo\_full signal indicates when the FIFO is full and the sample has been stored, the Fifo\_data bus contains the stored signal data. The Fifo\_data\_ready input is controlled by the CPU, which sends the clock necessary to read out the signal from the data bus.
+\marginlabel{Analog outputs:} As seen in Figure ~\ref{Block:Analog}, the Fifo\_full signal indicates when the FIFO is full and the sample has been stored, the Fifo\_data bus contains the stored signal data. The Fifo\_data\_ready input is controlled from the CPU, which sends the clock necessary to read out the signal from the data bus.
 
 The ADC clock (ADC\_clk) is also outputted from the controller to the ADC. It is is half the 24 MHz system clock (or a 12 MHz clock) because of the maximum ADC conversion rate, which is 20 M samples per second.
 
-\subsubsection{Rotary Encoders}\index{Rotary Encoders} \label{subsec:Rotary}%TODO reorder? 
+\subsubsection{Rotary Encoders}\index{Rotary Encoders} \label{subsec:Rotary}
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/Board_Layout_Rotary.png}}
@@ -385,15 +449,12 @@ The ADC clock (ADC\_clk) is also outputted from the controller to the ADC. It is
 	\label{Schematics:Rotary}    
 \end{fullfigure}
 
-Two rotary encoders are used for the user input.
+Two rotary encoders are used for the user input (SW1, SW2).
 These include and A and B output for the encoder and a single pull single throw push button switch. 
 
-Pins A and B are pulled high\footnote{1 K resistors were used in place of the 10 K resistors on the schematic because the voltage high output was too low for the buffers.}, while the common pin is grounded to create out-of-phase pulses from outputs A and B. 
-%TODO wave diagram
-
+Pins A and B are pulled high\footnote{1 K resistors were used in place of the 10 K resistors on the schematic because the voltage high output was too low for the buffers.}, while the common pin was grounded to create out-of-phase pulses from outputs A and B.
 
 \marginlabel{Rotary decoder logic:} 
-
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/RotaryCPU.png}}
@@ -424,11 +485,11 @@ Pins A and B are pulled high\footnote{1 K resistors were used in place of the 10
 
 \begin{fullfigure} 
 	\centering
-	\includegraphics[width=0.5\textwidth]{{data/RotaryCCWDecoder.png}}
+	\includegraphics[width=0.4\textwidth]{{data/RotaryCCWDecoder.png}}
 	\caption{Output of rotary decoder, counterclockwise turn.} 
 	\label{RotaryDecoderDiagram}    
 \end{fullfigure}
-\marginlabel{Summary:} The rotary logic block consists of a debouncer for the push button and a decoder for the rotary encoder. 
+The switch input and the two out-of-phase signals from each rotary encoder are decoded with the rotary controller. The rotary logic block consists of a debouncer for the push button and a decoder for the rotary encoder. 
 
 The debouncer (Figure~\ref{Block:RotaryDebouncer}) takes as inputs the active-low button input (Rotary1\_P and Rotary2\_P on the schematic), clock, and active-low reset signal. It outputs a single active-high clock pulse whenever the button input signal is low for longer than 100000 clocks, which was chosen through testing the switches. 
 
@@ -444,26 +505,36 @@ This is accomplished by first debouncing the input using a counter and comparato
 	\label{Layout:Display}    
 \end{fullfigure}
 
-Two 256Kx4 DRAM with 512x4 SAM (serial access memory) chips (U19, U22, MT42C4225) were used for a total of 8 bits of data, with a 480x272 RGB TFT LCD (Connector J2, ER-TFT043-3).
-%TODO schematic  pic
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.7\textwidth]{{data/VRAM_1.png}}
+	\includegraphics[width=0.7\textwidth]{{data/VRAM_2.png}}
+	\caption{VRAM schematics.} 
+	\label{Schematics:VRAM}    
+\end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.8\textwidth]{{data/LCD_Connector.png}}
+	\caption{LCD connector schematics.} 
+	\label{Schematics:LCD}    
+\end{fullfigure}
+
+% summary 
+Two 256Kx4 DRAM with 512x4 SAM (Serial Access Memory) chips (U19, U22, MT42C4225) were used for a total of 8 bits of data, with a 480x272 RGB TFT LCD (Connector J2, ER-TFT043-3).
 
 %TODO vram lines
-
-
 \marginlabel{VRAM:} \index{VRAM}
-Each VRAM sends 4 bits of serial data to the LCD, and receives 4 bits of data from the CPU, along with a 9 bit address and row address strobe (RAS), column address strobe (CAS), write enable (WE),and output enable (OE) signals from the VRAM controller. A serial clock signal is also sent to the VRAM. The LCD controller generates the various clock signals that are sent to synchronize the VRAM and LCD. 
+Each VRAM sends 4 bits of serial data to the LCD, and receives 4 bits of data from the CPU, along with a 9 bit address bus, row address strobe (RAS), column address strobe (CAS), write enable (WE), and output enable (OE) signals from the VRAM controller.  A serial clock signal is also sent to the VRAM. The LCD controller generates the various clock signals that are sent to synchronize the VRAM and LCD. 
+The same address bus and control signals are used between the two VRAM, and each sends and receives 4 different data bits. 
+
+Resistors R95 and R96 are included in series in the RAS and CAS lines for termination.
 
 The VRAM consists of the DRAM, transfer circuitry, and SAM. Read and write cycles are performed to read and write to the DRAM, and read transfer cycles are performed to transfer a row from the DRAM to SAM. 
- %TODO serial write
-The VRAM is refreshed when no other operations are being performed to retain data. 
-
-The two chips are sent the same control and address signals, and receive and output different data signals. 
-
-memory,sam stuff
+Serial output cycles are performed to output the current row data from the SAM to the LCD. The VRAM is refreshed when no other operations are being performed in order to retain data. 
 
 \marginlabel{LCD:} \index{LCD}
-The LCD receives 8 bits of data in parallel from the DRAM, 3 bits of red, 3 bits of green, and 2 bits of blue, with the unused color bits pulled down. It also receives a horizontal sync, vertical sync, clock, and data enable signal from the LCD controller. The touch inputs were unused. 
-%TODO block diagram 
+The LCD receives 8 bits of data in parallel from the VRAM: 3 bits red, 3 bits green, and 2 bits blue, with the unused color bits pulled down. It also receives a horizontal sync, vertical sync, clock, and data enable signal from the LCD controller. The touch inputs were unused. 
 
 The LCD also required a 25V backlight supply (VLED on the schematic). A step-up converter (U21) was used, which is discussed in more detail in Section~\ref{subsec:Power}.  
 
@@ -494,21 +565,12 @@ The VRAM controller takes several inputs from the CPU: 1-bit chip select and wri
 	\label{Block:VRAM_Controller}    
 \end{fullfigure}
 
-
 %mux address 
-The output address is selected and outputted using a multiplexer. For %TODO cycles 
-either the column or row, the first or second half of the input address, is returned. In the case of a row transfer %TODO check
-the SAM start address, 0 for the beginning of the SAM, and the current row, are outputted at the appropriate times. A counter is used to increment the current row for after each row transfer cycle, from row 0 to 272, or the total width of the LCD. 
-
+\marginlabel{Address:} The output address is selected and outputted using a multiplexer. For either the column or row address, the first or second half of the input address is returned. In the case of a row transfer, the SAM start address, 0 for the beginning of the memory, and the current row, are outputted at the appropriate times. A counter is used to increment the current row for after each row transfer cycle, from row 0 to 272, or the total height of the LCD. 
+%TODO memory map
 
 %State machine 
-The read, write, row transfer, and refresh cycles are performed with a Moore state machine.
-%TODO explain cycles, state machine inputs and outputs
-%CAS before RAS
-transfer/acknowledge with row transfer %TODO
-%TODO include VRAM_FSM.vhd 
-%TODO memory map
-% add more actual hardware-level things 
+\marginlabel{VRAM State Machine:} The read, write, row transfer, and refresh cycles are performed with a Moore state machine, Listing~\ref{}. %TODO include VRAM_FSM.vhd 
 
 The state machine begins at an idle state, and goes back to the idle state after each cycle is completed. If there is a row transfer request, when the transfer flag is active, the row transfer cycle is performed. If there is a write request, when the chip select and write enable inputs are active, then the write cycle is performed. If there is a read select, when the chip select is enabled but write enable is not, then the read cycle is performed. If none of these cycles are to be completed when in the idle state, a refresh cycle is performed. 
 
@@ -519,6 +581,8 @@ The LCD controller is used to generate the clock signals for the LCD.
 
 The Vertical Sync (VSYNC) signal is used for changing rows, and Horizontal Sync (HSYNC) for changing columns. The Data Enable (DE) signal is also generated for when input data is valid within the VSYNC AND HSYNC signals. A 12 MHz clock signal is also sent to the LCD, while a serial clock signal is generated  for the VRAM clock input to the serial address counter for the SAM registers.
 
+The row transfer request (Transfer signal in Figure~\ref{Block:LCD_Controller}) is set when the end of the row has been reached, and the flag is cleared once the VRAM controller has completed the row transfer and set the transfer acknowledge flag. %todo unsure
+
 The timing diagrams can be found in Appendix~\ref{AP:Timing}, Figures~\ref{AP:LCD_Horizontal_Timing} and \ref{AP:LCD_Vertical_Timing}.
 
 \begin{fullfigure} 
@@ -528,69 +592,7 @@ The timing diagrams can be found in Appendix~\ref{AP:Timing}, Figures~\ref{AP:LC
 	\label{Block:LCD_Controller}    
 \end{fullfigure}
 
-\subsubsection{Memory} \index{memory} \label{subsec:Memory}
-
-\begin{fullfigure} 
-	\centering
-	\includegraphics[width=1\textwidth]{{data/Board_Layout_Memory.png}}
-	\caption{Board Layout: Memory.} 
-	\label{Layout:Memory}    
-\end{fullfigure}
-
-\marginlabel{Memory Map:} 
-%TODO explain? 
-\begin{fullfigure} 
-	\centering
-	\includegraphics[width=0.4\textwidth]{{data/memorymap.png}}
-	\caption{Memory map diagram, used by the CPU(?)} %TODO
-	\label{Block:Memorymap}    
-\end{fullfigure}
-
-\marginlabel{ROM:} \index{ROM}
-1 512 K x 8 bit EEROM (U2, Am29F040) was used. %(to store things?).
-8 data bits are connected in parallel through the buffers to the CPU, along with 19 address bits, an active-low chip enable (CE), and output enable (OE) signal. The write enable (WE) signal was pulled up, as the ROM was written to with a dedicated ROM programmer.
-
-The ROM timing diagram for the read cycle can be seen at Appendix~\ref{AP:Timing}, Figure~\ref{AP:ROM_Read_Timing}. 3 read wait states were used. %is this the right way to say it?
-
-The executable file from the Nios II IDE was loaded into it using the ROM programmer. %TODO more??
-
-\begin{fullfigure} 
-	\centering
-	\includegraphics[width=1\textwidth]{{data/ROM.png}}
-	\caption{ROM Schematic.}
-	\label{Schematic:ROM}    
-\end{fullfigure}
-
-%block diagram
-
-\marginlabel{SRAM:} \index{SRAM}
-1 128 K x 8 bit CMOS static RAM was used (U1, HM628128B) 
-
-The address line is shared between the ROM and SRAM, with only the 17 least significant bits used for RAM addressing. The 8-bit data bus is also shared between the ROM and SRAM. The active-low output enable (OE), write enable (WE), and chip select (CS1) are also connected between the SRAM and CPU, with the second active high chip select (CS2) pulled high as required by the read and write cycles. 
-
-The SRAM timing diagrams can be seen at Appendix~\ref{AP:Timing},
-Figures~\ref{AP:RAM_Read_Timing} and \ref{AP:RAM_Write_Timing}. 2 read wait states and 1 write wait state was used. 
-
-\begin{fullfigure} 
-	\centering
-	\includegraphics[width=1\textwidth]{{data/SRAM.png}}
-	\caption{SRAM Schematic.}
-	\label{Schematic:SRAM}    
-\end{fullfigure}
-
-\marginlabel{Serial EEPROM:} \index{Serial EEPROM}
-A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used to store FPGA configuration data \footnote{Was unable to successfully use serial device for unknown reasons, possibly due to incorrect FPGA configurations.}.
-
-\begin{fullfigure} 
-	\centering
-	\includegraphics[width=0.75\textwidth]{{data/EEPROM.png}}
-	\caption{EEPROM Schematic.}
-	\label{Schematic:EEPROM}    
-\end{fullfigure}
-
-See Section~\ref{subsec:VRAMLCD} for details on the VRAM. 
-
-\subsubsection{JTAG, Reset, and Clock} \index{Clock} \index{JTAG} \index{Reset} 
+\subsubsection{JTAG, Reset, and Clock} 
 % separate? 
 \begin{fullfigure} 
 	\centering
@@ -599,14 +601,16 @@ See Section~\ref{subsec:VRAMLCD} for details on the VRAM.
 	\label{Layout:FPGAothers}    
 \end{fullfigure}
 
-\marginlabel{JTAG:} \index{Reset}
+\marginlabel{JTAG:} \index{JTAG}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.6\textwidth]{{data/JTAG.png}}
+	\caption{JTAG interface Schematic.}
+	\label{Schematic:JTAG}    
+\end{fullfigure}
+A JTAG interface was used for debugging the system, seen in Figure~\ref{Schematic:JTAG} and is connected directly to the appropriate FPGA pins. 
 
 \marginlabel{Reset:} \index{Reset}
-A reset circuit is used, which includes a microprocessor supervisory device (U3, MAX705). %more chip details
-The watchdog input (WDI) is implemented in the main loop, and a voltage divider is used for a power-fail warning at 4 V from the 5 V supply. 
-
-\marginlabel{Clock:} \index{Reset}
-
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=0.6\textwidth]{{data/ResetCircuit.png}}
@@ -614,11 +618,21 @@ The watchdog input (WDI) is implemented in the main loop, and a voltage divider 
 	\label{Schematic:Reset}    
 \end{fullfigure}
 
+A reset circuit is used, which includes a microprocessor supervisory device (U3, MAX705).
+The watchdog input (WDI) is implemented in the main loop, and a voltage divider is used for a power-fail warning at 4 V from the 5 V supply. 
+
 The active-low watchdog output, power-fail output, and reset output, and manual reset output are combined for an overall reset signal that is sent to the CPU and various controllers. 
 
-%schematic pic, fpga pic 
+\marginlabel{Clock:} \index{Clock}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=0.6\textwidth]{{data/Clock.png}}
+	\caption{Clock Circuit Schematic.}
+	\label{Schematic:Clock}    
+\end{fullfigure}
+A 24 MHz oscillator (X1) was used for the clock input for the device, with the CLK0 signal connected directly to the appropriate FPGA pin. 
 
-\subsubsection{Fixes}
+\subsubsection{Fixes} %TODO
 wrong adc footprint, buffer soldering error, backwards LCD connector
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -715,6 +729,27 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\label{AP:VRAM_Serial_Write_Timing}    
 \end{fullfigure}
 
+\section{Device Images}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Scope_Front}}
+	\caption{Front of device}
+	\label{Scope:front}    
+\end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Scope_Back}}
+	\caption{Back of device}
+	\label{Scope:back}    
+\end{fullfigure}
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Scope_On}}
+	\caption{Device running with sinusoidal input} %where is the caption consistency
+	\label{Scope:sine}    
+\end{fullfigure}
 
 \begin{comment}
 \begin{figure} [H]
