@@ -8,11 +8,11 @@
 # Name of file: display.s
 # Description: Display functions for digital oscilloscope
 # Public functions:
-#     void clear_display(void): Clears the display (turns black)
+#     void clear_display(void): Clears the display (turns black) by storing
+#         the pixel off value (PIXEL_WHITE) in all VRAM locations.
 #     void plot_pixel(unsigned int x, unsigned int y, int p): Sets the pixel at
-#         the passed position (x, y) to the passed value p (either PIXEL_BLACK
-#         or PIXEL_WHITE). The position is passed in binary with (0,0) being
-#         the upper left corner.
+#         the passed position (x, y) to the passed value p. The position is
+#         passed in binary with (0,0) being the upper left corner.
 #
 # Local functions: None.
 #
@@ -21,18 +21,20 @@
 #
 # Revision History: 06/06/17 Sophia Liu     Initial revision
 #                   09/04/17 Sophia Liu     Edited comments
+#                   12/2017  Sophia Liu     Edited comments
 
 # inc files for display constants
 #include "interfac.h"
-#inc "scopedef.h"
 #include "general.h"
 
 # Clear display
 #
 #
-# Description: Clears the display (turns black).
+# Description: Clears the display (turns black) by storing the pixel off value
+#              (PIXEL_WHITE) in all VRAM locations.
 #
-# Operation: Stores PIXEL_WHITE (pixel off) in each address in the VRAM.
+# Operation: Goes through each VRAM address and stores PIXEL_WHITE (pixel off)
+#            at each location.
 #
 # Arguments:         None.
 # Return Values:     None.
@@ -75,16 +77,21 @@ jmpi	clear_display_start           # else move to next address
 clear_display_end:
 ret
 
-# Plot pixel
-# plot_pixel(unsigned int x, unsigned int y, int p)
+# Plot_pixel
 #
-# Description:
+# Description: Sets the pixel at the passed position (x, y) to the passed
+#              value p. The position is passed in binary with (0,0) being the
+#              upper left corner.
 #
-# Operation: (0,0) upper left
+# Operation: Checks to make sure the position (x, y) is with the bounds of the
+#            display screen. If it is, the corresponding vram address is
+#            calculated and the pixel value p is stored.
 #
-# Arguments:         unsigned int x (r4)
-#                    unsigned int y (r5)
-#                    int p (r6)
+# Arguments:         unsigned int x (r4) - x value of pixel to plot, with (0,0)
+#                        being the upper left corner.
+#                    unsigned int y (r5)- y value of pixel to plot, with (0,0)
+#                        being the upper left corner.
+#                    int p (r6) - 8-bit value of the pixel to plot.
 # Return Values:     None.
 #
 # Local Variables:   None.
@@ -100,8 +107,8 @@ ret
 #
 # Known Bugs:        None.
 # Limitations:       None.
-# Registers changed:
-# Stack depth:
+# Registers changed: r8, r9, r10, r11.
+# Stack depth:       0 words.
 #
 # Revision History: 06/22/17   Sophia Liu      initial revision
 .section .text
@@ -112,22 +119,22 @@ plot_pixel:
 check_pixel:
 movi r9, TRUE
 cmpgei r8, r4, SIZE_X       # check if x point is too large for LCD
-beq r8, r9, invalid_point   # if it is, end
+beq r8, r9, invalid_point   # if it is invalid, end
 
 cmpgei r8, r5, SIZE_Y       # check if y point is too large for LCD
-beq r8, r9, invalid_point   # if it is, end
+beq r8, r9, invalid_point   # if it is invalid, end
 
 movia r10, VRAM_ADDRESS     # get vram address
 add r10, r4, r10            # add x offset to vram address
 
-muli r11, r5, 512
+muli r11, r5, VRAM_WIDTH    # multiply y by length of vram row for y offset
 add r10, r11, r10           # add y offset to vram address
 
-stb		r6, 0(r10)          # store pixel byte value in vram address
+stb r6, 0(r10)              # store pixel byte value in vram address
 jmpi end_plot
 
-invalid_point:
+invalid_point:             # invalid point, return
 ret
 
-end_plot:
+end_plot:                  # plotted point, return
 ret

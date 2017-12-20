@@ -26,7 +26,7 @@
 #define VRAM_ADDRESS_END   0x17ffff // vram end address
 
 // PIO addresses
-#define ROT_ADDRESS        0x1d10e0 // rotary pio address 
+#define ROT_ADDRESS        0x1d10e0 // rotary pio address
 
 // analog PIO addresses
 #define AUTO_TRIGGER_PIO   0x1d1150 // 1 bit data, 1 for auto triggering,
@@ -47,6 +47,7 @@
 #define WD_PIO             0x1d10b0 // 1 bit output for watchdog timer
 
 // other constants
+#define VRAM_WIDTH    512           // length of VRAM row 
 #define NUM_SAMPLES   512           // number of samples in fifo
 #define CLOCK_FREQ    24000000      // clock frequency, 24 MHz
 
