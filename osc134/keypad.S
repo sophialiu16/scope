@@ -15,11 +15,10 @@
 # Output:   None
 #
 # Revision History: 06/06/17 Sophia Liu     initial revision
+#                   12/2017  Sophia Liu     edited comments
 
 #include "interfac.h"
 #include "general.h"
- # .equ ROT_ADDRESS,0x00151010
- # .equ KEY_ILLEGAL, 0
 
 .section .text
 
@@ -29,14 +28,16 @@
 # Description: Returns
 #
 # Operation: Returns TRUE (non-zero) if there is a valid key ready to be
-#     processed and FALSE (zero) otherwise. Returns false after getKey is called
+#     processed and FALSE (zero) otherwise.
 #
 # Arguments:         None.
-# Return Values:     Int r2 , Non-zero (True) or zero (false), whether or not
-#                        there is a valid key ready to be processed
+# Return Values:     key is available -  TRUE (non-zero) if current key value is
+#                        valid or FALSE (zero) if it is not; whether
+#                        or not there is a valid key ready to be processed.
 #
 # Local Variables:   None.
-# Shared Variables:  None.
+# Shared Variables:  key_pressed (R) - 1 word unsigned int, contains current
+#                        debounced key.
 # Global Variables:  None.
 #
 # Input:             None.
@@ -48,8 +49,8 @@
 #
 # Known Bugs:        None.
 # Limitations:       None.
-# Registers changed:
-# Stack depth:
+# Registers changed: r8, r9, r2.
+# Stack depth:       2 words.
 #
 # Revision History: 06/06/17   Sophia Liu      initial revision
 .align 4
@@ -270,4 +271,4 @@ ret
 # data section
 .section .data
 .align 4
-key_pressed: .word 0x0         # 1 word unsigned int, contains current debounced key
+key_pressed: .word 0x0    # 1 word unsigned int, contains current debounced key
