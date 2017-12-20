@@ -45,9 +45,73 @@
     language=VHDL
 }
 
-\newenvironment{fullfigure}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{VHDLMeUp2}{
+	basicstyle=\scriptsize,
+	caption=\lstname, 
+	frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\lstdefinestyle{AS}{
+	basicstyle=\scriptsize,
+	caption=\lstname, 
+	frame=tb,
+	language=Assembler, %[x86masm]
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\lstdefinestyle{C}{
+	basicstyle=\scriptsize,
+	caption=\lstname, 
+	frame=tb,
+	language=C,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{fullfigure}  %full width figure
 {\begin{figure} [H]
-\hspace*{-\leftmarginwidth}%
+\hspace*{-\leftmarginwidth}
 \begin{minipage}{\fullwidth}}
 {\end{minipage}\end{figure}}
 	
@@ -636,16 +700,50 @@ A 24 MHz oscillator (X1) was used for the clock input for the device, with the C
 \subsubsection{Fixes} %TODO
 wrong adc footprint, buffer soldering error, backwards LCD connector
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Software
 \subsection{Software} \index{Software} \label{subsec:software}
-\subsubsection{Software System Overview} 
-\subsubsection{}
 
+\subsubsection{Software System Overview} 
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/software/Main_Block_Software.png}}
+	\caption{Software block diagram overview.}
+	\label{Block:Software}    
+\end{fullfigure}
+
+\subsubsection{Analog Software} \label{subsec:AnalogSoftware} \index{Analog! Software}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/software/Analog_Block_Software.png}}
+	\caption{Analog software block diagram.}
+	\label{Block:AnalogSoftware}    
+\end{fullfigure}
+
+%todo \lstinputlisting[style=AS]{../osc134/analog.S} 
+
+\subsubsection{Display Software} \label{subsec:DisplaySoftware} \index{Display! Software}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/software/Display_Block_Software.png}}
+	\caption{Display software block diagram.}
+	\label{Block:DisplaySoftware}    
+\end{fullfigure}
+
+\subsubsection{Keypad Software} \label{subsec:KeypadSoftware} \index{Keypad! Software}
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/software/Key_Block_Software.png}}
+	\caption{Keypad software block diagram.}
+	\label{Block:KeypadSoftware}    
+\end{fullfigure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix
 \appendix \index{Appendix}
 \section{Code}
 
 \begin{fullpage}\label{AP:scopetrig.vhd} %TODO this will take forever, change
-\lstinputlisting[style=VHDLMeUp]{data/scoptrig.vhd} 
+\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
 \end{fullpage}
 
 \section{Timing Diagrams} \label{AP:Timing} \index{Timing}
@@ -752,15 +850,6 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\label{Scope:sine}    
 \end{fullfigure}
 
-\begin{comment}
-\begin{figure} [H]
-\centering
-\includegraphics[width=0.75\textwidth]{{data/ADC.png}}
-\caption{}
-\label{ADC_Timing}    
-\end{figure}
-\end{comment}
-%\appendix 
 % entire schematic 
 % list of changes to pcb and glen's code 
 \printindex 
