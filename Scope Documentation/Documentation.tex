@@ -29,12 +29,14 @@
 \usepackage{amsmath}
 \usepackage{float}
 
+\usepackage{pdfpages} % for including pdfs 
+
 \usepackage{gensymb}
 % These packages are all incorporated in the memoir class to one degree or another...
 
 \usepackage{listings} % for including code 
 \usepackage{color}
-\usepackage[dvipsnames]{xcolor}
+%\usepackage[dvipsnames]{xcolor}
 
 \lstdefinestyle{VHDLMeUp}{
 	basicstyle=\scriptsize,
@@ -206,9 +208,15 @@ Usually ~10 pages
 The System on Programmable Chip (SoPC) Digital Oscilloscope is an FPGA/microprocessor-based system capable of capturing and displaying up to 5 MHz signals. The analog input can range from 0 V to 3.8 V. The system has all the features of a standard oscilloscope with the exception of input signal scaling. Two rotary encoders are used to control the settings, and a LCD display is used to display the captured signal.  
 
 \subsection{How to Use the System} 
-The system will begin immediately upon powering up. \footnote{The serial configuration device currently does not work, so the FPGA must first be programmed through the JTAG debugger.} The system starts in one-shot trace mode with a sampling rate of 100 ns, a mid-level trigger (halfway between the minimum and maximum trigger levels, at  1.9 V) with no delay and positive slope, and with the menu displayed and scale set to axes. % STARTUP PIC
+The system will begin immediately upon powering up. \footnote{The serial configuration device does not work, so the FPGA must first be programmed through the JTAG interface.} The system starts in one-shot trace mode with a sampling rate of 100 ns, a mid-level trigger (halfway between the minimum and maximum trigger levels, at  1.9 V) with no delay and positive slope, and with the menu displayed and scale set to axes. % STARTUP PIC
 The probe can be attached to the desired input source. The oscilloscope settings are described in section~\ref{subsec:SystemSettings}. The reset button can be used to restart the system. 
 %ROTARY ENCODERS LABELED, RESET BUTTON
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Display.png}}
+	\caption{Image of display while oscilloscope is on.} 
+	\label{Display}    
+\end{fullfigure}
 
 \subsection{System Settings}\label{subsec:SystemSettings}
 
@@ -245,8 +253,15 @@ The menu display can be toggled on and off by pressing the menu rotary encoder. 
 \end{description}
 
 \subsubsection{Rotary Encoder Functionality} \index{Rotary Encoder Functionality} \label{subsubsec:RotaryEncoderFunctionality}
-The user can change the scope configuration via two rotary encoders (seen in \ref{}). All of the scope parameters are set via an on-screen menu. The rotary actions are detailed below: 
-% ADD BOARD LAYOUT WITH ROTARY ENCODERS LABELED
+
+\begin{fullfigure} 
+	\centering
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_Rotary_Labeled.png}}
+	\caption{Board Layout: Labeled Rotary Encoders.} 
+	\label{Layout:RotaryLabeled}    
+\end{fullfigure}
+
+The user can change the scope configuration via two rotary encoders (seen in Figure~\ref{Layout:RotaryLabeled}). All of the scope parameters are set via an on-screen menu. The rotary actions are detailed below: 
 \begin{description}
 	\item[Press encoder 1] Turns the menu on/off. If the menu is off it is not displayed and turning the rotary encoders have no effect on the settings.
 	
@@ -316,18 +331,17 @@ FIFO buffer at the sampling rate. Once the FIFO is full, the CPU clocks out and 
 	\label{Layout:FPGA}    
 \end{fullfigure}
 
-An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. The schematics can be seen in Figure~\ref{}.
+An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. The full schematics with the FPGA can be seen in Appendix~\ref{AP:Schematics}.
 
 %level shifters / buffers 
 Buffers, or level shifters, were used to connect the buses and control signals from the peripheral chips to the FPGA to go between the low FPGA voltage and mainly 5V environment (U5, U6, U7, U8, U10, U12; 74LVT16245). A separate buffer was used to interface with the ADC (U17, TLC5510A), which had a larger input voltage range requirement (U18, SN74HCT240).
 
 % pinout 
-\marginlabel{Pin Assignments:} The pins were connected on the PCB as listed in Figure~\ref{}. 
-%pinout doc 
-%TODO
+\marginlabel{Pin Assignments:} The pins were connected on the PCB as listed below. 
+\includepdf[pages={-}]{data/Cyc3Pins.pdf} 
 
-The final product included several changes. Pin 162, an output for device configuration, was left floating, and the reset input was changed to Pin 187. One buffer was also left unusable, resulting in rewiring to extra I/O pins. 
-%pinout excel
+The final product included several changes. Pin 162, an output for device configuration, was left floating, and the reset input was changed to Pin 187. One buffer was also left unusable, resulting in rewiring to extra I/O pins. The pin assignments are shown below.  
+\includepdf[pages={-}]{data/Cyc3Pins_final.pdf} 
 
 % block diagram
 \begin{fullfigure} 
@@ -350,7 +364,7 @@ The final product included several changes. Pin 162, an output for device config
 	\caption{Board Layout: Power circuitry.} 
 	\label{Layout:Power}    
 \end{fullfigure}
-%TODO schematics
+The full power schematics can be found at Appendix~\ref{AP:Schematics}.
 
 A din4 connector (PWR1) is used to supply the board with +/-12 V and 5 V. All chips are locally bypassed.
 
@@ -635,7 +649,7 @@ The VRAM controller takes several inputs from the CPU: 1-bit chip select and wri
 %TODO memory map
 
 %State machine 
-\marginlabel{VRAM State Machine:} The read, write, row transfer, and refresh cycles are performed with a Moore state machine, Listing~\ref{}. %TODO include VRAM_FSM.vhd 
+\marginlabel{VRAM State Machine:} The read, write, row transfer, and refresh cycles are performed with a Moore state machine, Appendix~\ref{AP:VRAM_FSM.vhd}. 
 
 The state machine begins at an idle state, and goes back to the idle state after each cycle is completed. If there is a row transfer request, when the transfer flag is active, the row transfer cycle is performed. If there is a write request, when the chip select and write enable inputs are active, then the write cycle is performed. If there is a read select, when the chip select is enabled but write enable is not, then the read cycle is performed. If none of these cycles are to be completed when in the idle state, a refresh cycle is performed. 
 
@@ -698,7 +712,7 @@ The active-low watchdog output, power-fail output, and reset output, and manual 
 A 24 MHz oscillator (X1) was used for the clock input for the device, with the CLK0 signal connected directly to the appropriate FPGA pin. 
 
 \subsubsection{Fixes} %TODO
-wrong adc footprint, buffer soldering error, backwards LCD connector
+wrong adc footprint, buffer soldering error, backwards LCD connector footprint
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Software
 \subsection{Software} \index{Software} \label{subsec:software}
@@ -883,22 +897,27 @@ The rest of the code used can be found at Appendix~\ref{AP:Code}.
 	\label{Scope:sine}    
 \end{fullfigure}
 
-%todo
-% entire schematic 
-% list of changes to pcb and glen's code 
+\section{Schematics and PCB} \label{AP:Schematics} \label{AP:PCB} \index{Schematics} \index{PCB}
 
-\section{Software} \label{AP:Software}
+% entire schematic and pcb
+
+\includepdf[pages={-}, fitpaper=true]{data/Schematics.pdf} 
+ 
+% list of changes to pcb and glen's code 
+%TODO
+
+\section{Software} \label{AP:Software} \index{Code}
 
 \subsection{Hardware descriptions} \label{AP:VHDL}
 \begin{fullpage}
-	\label{AP:scopetrig.vhd} %TODO this will take forever, change
+	\label{AP:scopetrig.vhd} 
 	\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
 	
+	\label{AP:VRAM_FSM.vhd}
 	\lstinputlisting[style=VHDLMeUp2]{data/VRAM_FSM.vhd}
 \end{fullpage}
-test \ref{Code:keyproc.c}
 
-\subsection{Main code} \label{AP:Code}
+\subsection{Main code} \label{AP:Code} \index{Code}
 \begin{fullpage}
 	
 	\label{Code:mainloop.c}
@@ -970,9 +989,6 @@ test \ref{Code:keyproc.c}
 \caption{block diagram}
 \label{LCDBlockDiagram}    
 \end{figure}
-
-
-\usepackage{pdfpages}
 
 \includepdf[pages={1}]{myfile.pdf} 
 pages={-} 

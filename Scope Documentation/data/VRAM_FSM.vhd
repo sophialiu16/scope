@@ -3,16 +3,15 @@
 --  VRAM state machine
 --
 --  This is an implementation of a Moore state machine for the VRAM controller
---  VHDL.  The inputs to the system are the clock, reset, address, chip select,
---  transfer, and write enable signals.  The outputs are the RAS, CAS, OE,
---  address selecting, acknowledge, CPU wait, serial clock enable, and WE
---  signals for the VRAM.
---
---
+--  in VHDL. The inputs to the system are the chip select, write enable,
+--  transfer, clock, and reset enable signals.  The outputs are the RAS, CAS,
+--  address selecting, write enable, output enable, transfer acknowledge,
+--  CPU wait, and serial clock enable signals for the VRAM.
 --
 --  Revision History:
 --     02/17/2017    Sophia Liu    Initial Revision
 --     09/24/2017    Sophia Liu    Edited comments
+--     12/2017       Sophia Liu    Edited comments
 ----------------------------------------------------------------------------
 
 
@@ -48,13 +47,7 @@ end  VRAM_FSM;
 
 
 --
---  Oscilloscope Digital Trigger Moore State Machine
---     State Assignment Architecture
---
---  This architecture just shows the basic state machine syntax when the state
---  assignments are made manually.  This is useful for minimizing output
---  decoding logic and avoiding glitches in the output (due to the decoding
---  logic).
+--  Oscilloscope VRAM Moore State Machine
 --
 
 architecture  assign_statebits  of  VRAM_FSM  is
@@ -136,7 +129,8 @@ begin
                 elsif  (CS = '0' and WE_in = '1') then
                     NextState <= READ_1;     -- begin read
 					 else
-					     NextState <= REFRESH_1;   -- if not doing anything else then refresh
+					     NextState <= REFRESH_1;   -- if not doing anything else
+                                                   -- then refresh
                 end if;
 
 				when  ROW_1 =>           -- Row cycle
