@@ -73,7 +73,7 @@
 	basicstyle=\scriptsize,
 	caption=\lstname, 
 	frame=tb,
-	language=Assembler, %[x86masm]
+	%language=[x86masm]Assembler,
 	aboveskip=3mm,
 	belowskip=3mm,
 	showstringspaces=false,
@@ -711,6 +711,7 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\caption{Software block diagram overview.}
 	\label{Block:Software}    
 \end{fullfigure}
+The main components that were written were routines for the analog settings, display, and keypad \footnote{rotary encoders were implemented instead of a keypad, so references to the keypad refer to the rotary encoders}. As shown in Figure~\ref{Block:Software}, the main code handles the main loop and calls the various utility functions. The analog functions set the trigger settings used by the analog controller, and also clock out the signal data from the FIFO buffer into a buffer in the data section to be displayed. Display functions clear the display and plot a pixel by writing to the VRAM, whose data is outputted to the LCD. Keypad routines include an event handler and getting the key pressed. These will be discussed in more details below. 
 
 \subsubsection{Analog Software} \label{subsec:AnalogSoftware} \index{Analog! Software}
 \begin{fullfigure} 
@@ -720,7 +721,9 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\label{Block:AnalogSoftware}    
 \end{fullfigure}
 
-%todo \lstinputlisting[style=AS]{../osc134/analog.S} 
+\begin{fullpage}\label{AP:analog.S}
+\lstinputlisting[style=AS]{../osc134/analog.S} 
+\end{fullpage}
 
 \subsubsection{Display Software} \label{subsec:DisplaySoftware} \index{Display! Software}
 \begin{fullfigure} 
@@ -730,6 +733,10 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\label{Block:DisplaySoftware}    
 \end{fullfigure}
 
+\begin{fullpage}\label{AP:display.S}
+	\lstinputlisting[style=AS]{../osc134/displayFunc.S} 
+\end{fullpage}
+
 \subsubsection{Keypad Software} \label{subsec:KeypadSoftware} \index{Keypad! Software}
 \begin{fullfigure} 
 	\centering
@@ -738,14 +745,12 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\label{Block:KeypadSoftware}    
 \end{fullfigure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix
-\appendix \index{Appendix}
-\section{Code}
-
-\begin{fullpage}\label{AP:scopetrig.vhd} %TODO this will take forever, change
-\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
+\begin{fullpage}\label{AP:keypad.S}
+	\lstinputlisting[style=AS]{../osc134/keypad.S} 
 \end{fullpage}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix
+\appendix \index{Appendix}
 \section{Timing Diagrams} \label{AP:Timing} \index{Timing}
 \subsection{ADC} %TODO format
 	\begin{fullfigure} 
@@ -852,6 +857,16 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 
 % entire schematic 
 % list of changes to pcb and glen's code 
+
+\section{Code}
+
+\subsection{Hardware descriptions}
+\begin{fullpage}\label{AP:scopetrig.vhd} %TODO this will take forever, change
+	\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
+\end{fullpage}
+
+\subsection{Main software}
+
 \printindex 
 \end{document}
 

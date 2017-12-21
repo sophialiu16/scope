@@ -27,7 +27,8 @@
 #        current sample and a pointer to the sampled data otherwise. The
 #        sampled data should contain the number of data points previously
 #        returned by the set_sample_rate function. The function should only
-#        return a non-NULL pointer once for each call to the start_sample function.
+#        return a non-NULL pointer once for each call to the start_sample
+#        function.
 # Local functions: None.
 # Input:    None.
 # Output:   None.
@@ -41,8 +42,9 @@
 # set sample rate
 #
 #
-# Description: Sets the sample rate to the passed argument, in samples per second.
-#     Returns the number of samples that will be taken at that sample rate.
+# Description: Sets the sample rate to the passed argument, in samples per
+#     second. Returns the number of samples that will be taken at that sample
+#     rate.
 #
 # Operation: Divides the clock frequency by the rate to get the number of
 #     clocks between samples. Writes the sample number to the sample rate pio.
