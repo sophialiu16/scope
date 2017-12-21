@@ -35,6 +35,7 @@
 				 references (no longer used).
       5/27/08  Glen George       Changed code to only check for sample done if
 				 it is currently sampling.
+      08/17    Sophia Liu        Added watchdog reset pulsing
 */
 
 
@@ -196,7 +197,7 @@ static  enum keycode  key_lookup()
 	   KEYCODE_LEFT,      /* <Left>     */
 	   KEYCODE_RIGHT,     /* <Right>    */
 	   KEYCODE_ILLEGAL    /* other keys */
-        }; 
+        };
 
     const static int  keys[] =   /* array of key values */
         {			 /* order must match keycodes array exactly */
@@ -205,7 +206,7 @@ static  enum keycode  key_lookup()
 	   KEY_DOWN,    /* <Down>     */
 	   KEY_LEFT,    /* <Left>     */
 	   KEY_RIGHT,   /* <Right>    */
-        }; 
+        };
 
     int  key; 		/* an input key */
 

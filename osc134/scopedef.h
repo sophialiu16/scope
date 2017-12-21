@@ -25,6 +25,7 @@
       5/27/08  Glen George       Added check for __nios__ definition to also
                                  indicate the compilation is for an Altera
 			         NIOS CPU.
+      8/17     Sophia Liu        Updated function declarations
 */
 
 
@@ -94,7 +95,7 @@ enum keycode  {  KEYCODE_MENU,      /* <Menu>     */
 	         KEYCODE_RIGHT,     /* <Right>    */
 	         KEYCODE_ILLEGAL,   /* other keys */
 		 NUM_KEYCODES       /* number of key codes */
-              }; 
+              };
 
 
 
@@ -118,7 +119,7 @@ void  set_delay(long int);		/* set the trigger delay time */
 void                start_sample(int);	/* capture a sample */
 unsigned char *sample_done(void);	/* sample captured status */
 
-/* watchdog input functions */ 
-void  pulse_wd(void);    /* pulse watchdog input on reset chip */ 
+/* watchdog input functions */
+void  pulse_wd(void);    /* pulse watchdog input on reset chip */
 
 #endif

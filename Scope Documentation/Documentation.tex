@@ -711,48 +711,65 @@ wrong adc footprint, buffer soldering error, backwards LCD connector
 	\caption{Software block diagram overview.}
 	\label{Block:Software}    
 \end{fullfigure}
-The main components that were written were routines for the analog settings, display, and keypad \footnote{rotary encoders were implemented instead of a keypad, so references to the keypad refer to the rotary encoders}. As shown in Figure~\ref{Block:Software}, the main code handles the main loop and calls the various utility functions. The analog functions set the trigger settings used by the analog controller, and also clock out the signal data from the FIFO buffer into a buffer in the data section to be displayed. Display functions clear the display and plot a pixel by writing to the VRAM, whose data is outputted to the LCD. Keypad routines include an event handler and getting the key pressed. These will be discussed in more details below. 
+The main components that were written were routines for the analog settings, display, and keypad \footnote{rotary encoders were implemented instead of a keypad, so references to the keypad refer to the rotary encoders}. As shown in Figure~\ref{Block:Software}, the main code handles the main loop and calls the various utility functions. The analog functions set the trigger settings used by the analog controller, and also clock out the signal data from the FIFO buffer into a buffer in the data section to be displayed. Display functions clear the display and plot a pixel by writing to the VRAM, whose data is outputted to the LCD. Keypad routines include an event handler and getting the key pressed. A reset function that toggles the watchdog input on the reset chip was also written. These will be discussed in more details below. 
 
 \subsubsection{Analog Software} \label{subsec:AnalogSoftware} \index{Analog! Software}
+
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/software/Analog_Block_Software.png}}
 	\caption{Analog software block diagram.}
 	\label{Block:AnalogSoftware}    
 \end{fullfigure}
-
-\begin{fullpage}\label{AP:analog.S}
+%TODO
+\begin{fullpage}\label{Code:analog.S}
 \lstinputlisting[style=AS]{../osc134/analog.S} 
 \end{fullpage}
 
 \subsubsection{Display Software} \label{subsec:DisplaySoftware} \index{Display! Software}
+
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/software/Display_Block_Software.png}}
 	\caption{Display software block diagram.}
 	\label{Block:DisplaySoftware}    
 \end{fullfigure}
-
-\begin{fullpage}\label{AP:display.S}
+%TODO
+\begin{fullpage}\label{Code:display.S}
 	\lstinputlisting[style=AS]{../osc134/displayFunc.S} 
 \end{fullpage}
 
 \subsubsection{Keypad Software} \label{subsec:KeypadSoftware} \index{Keypad! Software}
+
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/software/Key_Block_Software.png}}
 	\caption{Keypad software block diagram.}
 	\label{Block:KeypadSoftware}    
 \end{fullfigure}
-
-\begin{fullpage}\label{AP:keypad.S}
+%TODO
+\begin{fullpage}\label{Code:keypad.S}
 	\lstinputlisting[style=AS]{../osc134/keypad.S} 
+\end{fullpage}
+
+
+\subsubsection{Watchdog Reset} \label{subsec:ResetSoftware}
+A reset function to toggle the watchdog input on the reset circuit (Reset\_WDI, Figure~\ref{Schematic:Reset}) was also written. It is called in the main loop (Listing ~\ref{Code:mainloop.c}), which should never stall.
+
+\begin{fullpage}\label{Code:reset.S}  
+	\lstinputlisting[style=AS]{../osc134/reset.S} 
+\end{fullpage}
+
+\subsubsection{Header files} \label{subsec:Headers}
+
+\begin{fullpage}\label{Code:general.h}
+	\lstinputlisting[style=AS]{../osc134/general.h} 
 \end{fullpage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix
 \appendix \index{Appendix}
 \section{Timing Diagrams} \label{AP:Timing} \index{Timing}
-\subsection{ADC} %TODO format
+\subsection{ADC}
 	\begin{fullfigure} 
 		\centering
 		\includegraphics[width=1\textwidth]{{data/timing/ADC.png}}
@@ -855,6 +872,7 @@ The main components that were written were routines for the analog settings, dis
 	\label{Scope:sine}    
 \end{fullfigure}
 
+%todo
 % entire schematic 
 % list of changes to pcb and glen's code 
 
@@ -866,6 +884,7 @@ The main components that were written were routines for the analog settings, dis
 \end{fullpage}
 
 \subsection{Main software}
+%todo include all files
 
 \printindex 
 \end{document}
