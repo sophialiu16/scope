@@ -721,7 +721,12 @@ The main components that were written were routines for the analog settings, dis
 	\caption{Analog software block diagram.}
 	\label{Block:AnalogSoftware}    
 \end{fullfigure}
-%TODO
+The analog software includes analog  initialization, which sets the trigger enable and sample done flags to false, as well as a start\_sample initialization for to start the sample. It enables triggering, sets autotriggering, and sets the sample done flag to false. The sample done flag is used to ensure that only one sample is taken per enabled trigger.
+
+Sampling\_done checks to see if the buffer is full and a sample has been taken. If it is, and no sample has been taken yet, the data from the FIFO is clocked out and stored in the data buffer shared variable to be displayed. These functions are called by the main loop and the various trace and sampling utilities. 
+
+There are also functions for setting the sampling rate, trigger level, trigger slope, and trigger delay. These are called upon initialization and when their corresponding settings have been changed from the menu. These directly change the outputs that are sent to the analog controller and are used to take the sample.  
+
 \begin{fullpage}\label{Code:analog.S}
 \lstinputlisting[style=AS]{../osc134/analog.S} 
 \end{fullpage}
@@ -734,7 +739,9 @@ The main components that were written were routines for the analog settings, dis
 	\caption{Display software block diagram.}
 	\label{Block:DisplaySoftware}    
 \end{fullfigure}
-%TODO
+
+The display functions perform the basic requirements of clearing the LCD, or turning all the pixels black, and plotting a specified pixel on the display. These modify the data at the appropriate addresses in the VRAM. These functions are used upon initialization and when plotting the menu and sample, as the display is cleared between each sample. 
+
 \begin{fullpage}\label{Code:display.S}
 	\lstinputlisting[style=AS]{../osc134/displayFunc.S} 
 \end{fullpage}
@@ -747,14 +754,16 @@ The main components that were written were routines for the analog settings, dis
 	\caption{Keypad software block diagram.}
 	\label{Block:KeypadSoftware}    
 \end{fullfigure}
-%TODO
+
+The keypad software has an event handler for whenever a key is pressed and a keypad interrupt occurs. The key value is stored in the key\_pressed shared variable. This is accessed by the key\_available and getKey functions. Key\_available returns whether or not there is a valid key, and if there is, getKey is called and will return the valid key. These are called from the main loop when checking if there is keypad input. 
+
 \begin{fullpage}\label{Code:keypad.S}
 	\lstinputlisting[style=AS]{../osc134/keypad.S} 
 \end{fullpage}
 
 
 \subsubsection{Watchdog Reset} \label{subsec:ResetSoftware}
-A reset function to toggle the watchdog input on the reset circuit (Reset\_WDI, Figure~\ref{Schematic:Reset}) was also written. It is called in the main loop (Listing ~\ref{Code:mainloop.c}), which should never stall.
+A reset function to toggle the watchdog input on the reset circuit (Reset\_WDI, Figure~\ref{Schematic:Reset}) was also written. The toggled output is sent out to the reset device. This function is called in the main loop (Listing ~\ref{Code:mainloop.c}), which should never stall or take greater than the time required for the reset device to send out a watchdog reset signal. If it does, some error has occurred and the system will reset. 
 
 \begin{fullpage}\label{Code:reset.S}  
 	\lstinputlisting[style=AS]{../osc134/reset.S} 
@@ -765,6 +774,8 @@ A reset function to toggle the watchdog input on the reset circuit (Reset\_WDI, 
 \begin{fullpage}\label{Code:general.h}
 	\lstinputlisting[style=AS]{../osc134/general.h} 
 \end{fullpage}
+
+The rest of the code used can be found at Appendix~\ref{AP:Code}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix
 \appendix \index{Appendix}
@@ -876,15 +887,62 @@ A reset function to toggle the watchdog input on the reset circuit (Reset\_WDI, 
 % entire schematic 
 % list of changes to pcb and glen's code 
 
-\section{Code}
+\section{Software} \label{AP:Software}
 
-\subsection{Hardware descriptions}
-\begin{fullpage}\label{AP:scopetrig.vhd} %TODO this will take forever, change
+\subsection{Hardware descriptions} \label{AP:VHDL}
+\begin{fullpage}
+	\label{AP:scopetrig.vhd} %TODO this will take forever, change
 	\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
+	
+	\lstinputlisting[style=VHDLMeUp2]{data/VRAM_FSM.vhd}
 \end{fullpage}
+test \ref{Code:keyproc.c}
 
-\subsection{Main software}
-%todo include all files
+\subsection{Main code} \label{AP:Code}
+\begin{fullpage}
+	
+	\label{Code:mainloop.c}
+	\lstinputlisting[style=C]{../osc134/mainloop.c}
+	
+	\label{Code:scopedef.h}
+	\lstinputlisting[style=C]{../osc134/scopedef.h}
+	
+	\label{Code:interfac.h}
+	\lstinputlisting[style=C]{../osc134/interfac.h} 
+	
+	\label{Code:menu.c}
+	\lstinputlisting[style=C]{../osc134/menu.c}
+	
+	\label{Code:menu.h}
+	\lstinputlisting[style=C]{../osc134/menu.h}
+	
+	\label{Code:menuact.c}
+	\lstinputlisting[style=C]{../osc134/menuact.c}  
+	
+	\label{Code:menuact.h}
+	\lstinputlisting[style=C]{../osc134/menuact.h} 
+	
+	\label{Code:keyproc.c}
+	\lstinputlisting[style=C]{../osc134/keyproc.c}
+	
+	\label{Code:keyproc.h}
+	\lstinputlisting[style=C]{../osc134/keyproc.h}  
+	
+	\label{Code:lcdout.c}
+	\lstinputlisting[style=C]{../osc134/lcdout.c}
+	
+	\label{Code:lcdout.h}
+	\lstinputlisting[style=C]{../osc134/lcdout.h}
+	
+	\label{Code:tracutil.c}
+	\lstinputlisting[style=C]{../osc134/tracutil.c}
+	
+	\label{Code:tracutil.h}
+	\lstinputlisting[style=C]{../osc134/tracutil.h}  
+		
+	\label{Code:char57.c}
+	\lstinputlisting[style=C]{../osc134/char57.c}     
+\end{fullpage}
 
 \printindex 
 \end{document}
