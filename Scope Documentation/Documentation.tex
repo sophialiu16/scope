@@ -332,7 +332,7 @@ FIFO buffer at the sampling rate. Once the FIFO is full, the CPU clocks out and 
 
 \includepdf[pages={2}, fitpaper=true]{data/Schematics.pdf} 
 
-An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. The full schematics with the FPGA can be seen in Appendix~\ref{AP:Schematics}.
+An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with linear regulators, and each power pin was locally bypassed. The full schematics with the FPGA can be seen in Appendix~\ref{AP:Schematics}.
 
 %level shifters / buffers 
 Buffers, or level shifters, were used to connect the buses and control signals from the peripheral chips to the FPGA to go between the low FPGA voltage and mainly 5V environment (U5, U6, U7, U8, U10, U12; 74LVT16245). A separate buffer was used to interface with the ADC (U17, TLC5510A), which had a larger input voltage range requirement (U18, SN74HCT240).
@@ -361,7 +361,7 @@ The final product included several changes. Pin 162, an output for device config
 
 \begin{fullfigure} 
 	\centering
-	\includegraphics[width=1\textwidth]{{data/Board_Layout_FPGA.png}}
+	\includegraphics[width=1\textwidth]{{data/Board_Layout_Power.png}}
 	\caption{Board Layout: Power circuitry.} 
 	\label{Layout:Power}    
 \end{fullfigure}
@@ -371,11 +371,11 @@ The final product included several changes. Pin 162, an output for device config
 A din4 connector (PWR1) is used to supply the board with +/-12 V and 5 V. All chips are locally bypassed.
 
 5 V is used to power the reset, VRAM, SRAM, ROM, and ADC chips. 
-Several LM1086 regulators are used to generate the other required voltages. Specifically, U14 uses the 5 V supply to generate 2.5 V for analog power to the FPGA PLLs, and U15 uses the 5 V supply to generate 1.2 V for FPGA power supply and digital power to the FPGA PLLs. U16 generates 3.3 V from 5 V, which is used to power the FPGA I/O supply pins, buffers, JTAG, serial configuration device, clock, and for pulling high the rotary encoder outputs.
+Several LM1086 linear regulators are used to generate the other required voltages. Specifically, U14 uses the 5 V supply to generate 2.5 V for analog power to the FPGA PLLs, and U15 uses the 5 V supply to generate 1.2 V for FPGA power supply and digital power to the FPGA PLLs. U16 generates 3.3 V from 5 V, which is used to power the FPGA I/O supply pins, buffers, JTAG, serial configuration device, clock, and for pulling high the rotary encoder outputs.
 
 Regulators also generate 5 V from 12 V (U24) and 4 V from 5 V (U23) for ADC reference voltages.
 
-A boost converter is used to generate the 25 V necessary for the LCD backlight. U21 (AP3012) steps up from 5 V and outputs 25 V  (Figure~\ref{Schematic:LCDpower}).
+A step-up (boost) converter is used to generate the 25 V necessary for the LCD backlight. U21 (AP3012) steps up from 5 V and outputs 25 V  (Figure~\ref{Schematic:LCDpower}).
 
 % boost converter 
 \begin{fullfigure} 
