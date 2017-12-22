@@ -35,7 +35,8 @@
 				 references (no longer used).
       5/27/08  Glen George       Changed code to only check for sample done if
 				 it is currently sampling.
-      08/17    Sophia Liu        Added watchdog reset pulsing
+      08/17    Sophia Liu        Added initialization functions and watchdog
+                                 reset pulse calls
 */
 
 
@@ -113,8 +114,6 @@ int  main()
 
     /* first initialize everything */
     clear_display();		/* clear the display */
-
-    plot_pixel(428, 10, PIXEL_BLACK);
 
     init_trace();		/* initialize the trace routines */
     init_menu();		/* initialize the menu system */

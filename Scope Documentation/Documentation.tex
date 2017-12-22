@@ -208,19 +208,17 @@ Usually ~10 pages
 The System on Programmable Chip (SoPC) Digital Oscilloscope is an FPGA/microprocessor-based system capable of capturing and displaying up to 5 MHz signals. The analog input can range from 0 V to 3.8 V. The system has all the features of a standard oscilloscope with the exception of input signal scaling. Two rotary encoders are used to control the settings, and a LCD display is used to display the captured signal.  
 
 \subsection{How to Use the System} 
-The system will begin immediately upon powering up. \footnote{The serial configuration device does not work, so the FPGA must first be programmed through the JTAG interface.} The system starts in one-shot trace mode with a sampling rate of 100 ns, a mid-level trigger (halfway between the minimum and maximum trigger levels, at  1.9 V) with no delay and positive slope, and with the menu displayed and scale set to axes. % STARTUP PIC
+The system will begin immediately upon powering up. \footnote{The serial configuration device does not work, so the FPGA must first be programmed through the JTAG interface.} The system starts in one-shot trace mode with a sampling rate of 100 ns, a mid-level trigger (halfway between the minimum and maximum trigger levels, at  1.9 V) with no delay and positive slope, and with the menu displayed and scale set to axes. 
 The probe can be attached to the desired input source. The oscilloscope settings are described in section~\ref{subsec:SystemSettings}. The reset button can be used to restart the system. 
-%ROTARY ENCODERS LABELED, RESET BUTTON
+%RESET BUTTON
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/Display.png}}
-	\caption{Image of display while oscilloscope is on.} 
+	\caption{Image of display while oscilloscope is on, before triggering.} 
 	\label{Display}    
 \end{fullfigure}
 
 \subsection{System Settings}\label{subsec:SystemSettings}
-
-% ADD MENU PICS
 \subsubsection{Menu}\index{Menu}
 The scope parameter menu is located in the upper right corner of the LCD and contains the following entries in order:
 
@@ -245,7 +243,7 @@ The menu display can be toggled on and off by pressing the menu rotary encoder. 
 	
 	\index{Menu!Trigger}\item[Trigger] The Trigger menu entry re-arms the trigger for the scope in one-shot mode. Any time it is selected and the secondary rotary encoder is turned the scope trigger is re-armed and a new trace will then be captured once the trigger conditions (level and slope) are met.
 	
-	\index{Menu!Level}\item[Level] The Level menu entry sets the trigger level. It can be set to any value from the most negative input voltage to the most positive in 128 steps. Additionally, the trigger level is displayed as a line on the screen when the trigger level is being changed.
+	\index{Menu!Level}\item[Level] The Level menu entry sets the trigger level. It can be set to any value from the most negative input voltage (0) to the most positive (3.8 V) in 128 steps. Additionally, the trigger level is displayed as a line on the screen when the trigger level is being changed.
 	
 	\index{Menu!Slope}\item[Slope] The Slope menu entry is either Slope + or Slope - and determines whether the scope is triggered on a positive or negative slope respectively.
 	
@@ -312,24 +310,27 @@ The user can change the scope configuration via two rotary encoders (seen in Fig
 \end{fullfigure}
 
 % MEMORY MAP
-The oscilloscope system is centered around a Cyclone III FPGA, which includes a Nios II CPU and controllers for the VRAM, LCD, rotary encoders, and analog input and triggering. Upon startup, the bitmap %TODO is it a bitmap???
-is loaded from the serial EEPROM. The %SOFTWARE? 
-is then loaded from the ROM.
+The oscilloscope system is centered around a Cyclone III FPGA, which includes a Nios II CPU and controllers for the VRAM, LCD, rotary encoders, and analog input and triggering. Upon startup, the configuration data is loaded from the serial EEPROM. The program is then loaded from the ROM, with the program data stored in the RAM. 
 
-\marginlabel{Receiving a Signal:} When the probe is connected to a desired input, the analog signal is sent to an Analog to Digital Converter chip. 8 bits of data are then sent in parallel to the FPGA to an analog controller. The various trigger setting inputs (auto triggering, trigger enable, trigger slope, trigger level) are used along with the 8 bit signal to determine if the system should begin sampling. Once triggering has occurred, the signal is written to a %SIZE, 512 
+\marginlabel{Receiving a Signal:} When the probe is connected to a desired input, the analog signal is sent to an analog to digital converter chip. Data is sent to the FPGA to an analog controller. The various trigger setting inputs (auto triggering, trigger enable, trigger slope, trigger level) are used along with the 8 bit signal to determine if the system should begin sampling. Once triggering has occurred, the signal is written to a %SIZE, 512 
 FIFO buffer at the sampling rate. Once the FIFO is full, the CPU clocks out and stores the buffer data to be displayed. 
 
 \marginlabel{Displaying a Signal:} In order to display the signal on the LCD, data is written to the VRAM, which is then sent out to the LCD. Several control signals (write enable, chip select, address, wait) are sent from the CPU to the VRAM controller to perform read and write operations on the VRAM. An LCD controller sends out the necessary control signals to display the signal. 
 
+\marginlabel{User Input:} Two rotary encoders are used for navigating through the menu. A rotary controller in the FPGA decodes and debounces the input.
+
 % the other things 
 
-\subsubsection{FPGA} \index{FPGA}%HERE? idk. talk about controllers 
+\subsubsection{FPGA} \index{FPGA}
 \begin{fullfigure} 
 	\centering
 	\includegraphics[width=1\textwidth]{{data/Board_Layout_FPGA.png}}
 	\caption{Board Layout: FPGA and buffers.} 
 	\label{Layout:FPGA}    
 \end{fullfigure}
+
+
+\includepdf[pages={2}, fitpaper=true]{data/Schematics.pdf} 
 
 An Altera Cyclone III FPGA was used for all the logic and processing required (U9, EP3C25Q240). The three required voltage levels were generated with regulators, and each power pin was locally bypassed. The full schematics with the FPGA can be seen in Appendix~\ref{AP:Schematics}.
 
@@ -364,14 +365,15 @@ The final product included several changes. Pin 162, an output for device config
 	\caption{Board Layout: Power circuitry.} 
 	\label{Layout:Power}    
 \end{fullfigure}
-The full power schematics can be found at Appendix~\ref{AP:Schematics}.
+
+\includepdf[pages={4}, fitpaper=true]{data/Schematics.pdf}
 
 A din4 connector (PWR1) is used to supply the board with +/-12 V and 5 V. All chips are locally bypassed.
 
 5 V is used to power the reset, VRAM, SRAM, ROM, and ADC chips. 
 Several LM1086 regulators are used to generate the other required voltages. Specifically, U14 uses the 5 V supply to generate 2.5 V for analog power to the FPGA PLLs, and U15 uses the 5 V supply to generate 1.2 V for FPGA power supply and digital power to the FPGA PLLs. U16 generates 3.3 V from 5 V, which is used to power the FPGA I/O supply pins, buffers, JTAG, serial configuration device, clock, and for pulling high the rotary encoder outputs.
 
-Regulators also generate 5 V from 12 V (U24) and 4 V from 5 V (U23) for ADC reference voltages. The main power schematics can be seen in Figure~\ref{}.
+Regulators also generate 5 V from 12 V (U24) and 4 V from 5 V (U23) for ADC reference voltages.
 
 A boost converter is used to generate the 25 V necessary for the LCD backlight. U21 (AP3012) steps up from 5 V and outputs 25 V  (Figure~\ref{Schematic:LCDpower}).
 
@@ -407,7 +409,7 @@ Several types of storage were used, including ROM (U2) for permanent program sto
 1 512 K x 8 bit EEROM (U2, Am29F040) was used for program storage. %correct tense hell
 8 data bits are connected in parallel through the buffers to the CPU, along with 19 address bits, an active-low chip enable (CE), and output enable (OE) signal. The write enable (WE) signal was pulled up, as the ROM was written to with a dedicated ROM programmer.
 
-The ROM timing diagram for the read cycle can be seen at Appendix~\ref{AP:Timing}, Figure~\ref{AP:ROM_Read_Timing}. 3 read wait states were used. %is this the right way to say it?
+The ROM timing diagram for the read cycle can be seen at Appendix~\ref{AP:Timing}, Figure~\ref{AP:ROM_Read_Timing}. 3 wait states were used for the read cycle. %is this the right way to say it?
 
 The executable file from the Nios II IDE was loaded into the ROM using a ROM programmer. 
 
@@ -438,7 +440,7 @@ Figures~\ref{AP:RAM_Read_Timing} and \ref{AP:RAM_Write_Timing}. 2 read wait stat
 \marginlabel{VRAM:} See Section~\ref{subsec:VRAMLCD} for details on the VRAM.
  
 \marginlabel{Serial Device:} \index{Serial Device}
-A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used to store FPGA configuration data \footnote{Was unable to successfully use serial device for unknown reasons, possibly due to incorrect FPGA configurations.}.
+A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used to store FPGA configuration data and was programmed with the Altera Quartus II toolset \footnote{Was unable to successfully use serial device for unknown reasons, possibly due to incorrect FPGA configurations.}.
 
 \begin{fullfigure} 
 	\centering
@@ -479,7 +481,7 @@ A serial configuration device (U4, EPCS16), a 2 MB flash memory device, was used
 % pins 
 The 8 bit data bus was connected to the CPU in parallel, and a clock input was generated from the analog controller. A separate buffer was required to meet the ADC input voltage requirements (U18 in Figure~\ref{Schematic:ADC_Buffer}). Protection diodes (D6, D7 in Figure~\ref{Schematic:ADC}) with a low forward voltage (about 0.2 V) were used to keep the analog input within the allowed input range. 
 
-Several analog supply voltages were used to isolate the analog and digital circuitry. An external 4 V analog reference was generated and used for a 0-4 V input signal range. A 5 V analog power supply was also required, along with an analog ground reference connected to digital ground through a power inductor (Part L2, Figure~\ref{}). 
+Several analog supply voltages were used to isolate the analog and digital circuitry. An external 4 V analog reference was generated and used for a 0-4 V input signal range. A 5 V analog power supply was also required, along with an analog ground reference connected to digital ground through a power inductor (Part L2). 
 
 \marginlabel{Analog logic:}
 \index{Analog!Logic}
@@ -498,7 +500,7 @@ Several values are taken as outputs from the CPU and are used in the hardware lo
 
 \marginlabel{Trigger logic:} \index{Trigger}
 First, the system determines whether or not a trigger has occurred.
-A Moore state machine (the ScopeTrigger block in Figure~\ref{Block:Analog}) is used to determine whether or not a trigger has occurred. The trigger event output is set high when the trigger slope is positive and the signal has transitioned from below to above the trigger level, or if the trigger slope is negative and the signal has transitioned from above to below the trigger level. The logic description can be found at Appendix~\ref{scopetrig.vhd}.
+A Moore state machine (the ScopeTrigger block in Figure~\ref{Block:Analog}) is used to determine whether or not a trigger has occurred. The trigger event output is set high when the trigger slope is positive and the signal has transitioned from below to above the trigger level, or if the trigger slope is negative and the signal has transitioned from above to below the trigger level. The logic description can be found at Appendix~\ref{AP:scopetrig.vhd}.
 
 In order to do this, the 8-bit signal is compared to the trigger level in lpm\_compare0 in Figure~\ref{Block:Analog}, and the outputs are sent to the trigger state machine.
 
@@ -711,9 +713,6 @@ The active-low watchdog output, power-fail output, and reset output, and manual 
 \end{fullfigure}
 A 24 MHz oscillator (X1) was used for the clock input for the device, with the CLK0 signal connected directly to the appropriate FPGA pin. 
 
-\subsubsection{Fixes} %TODO
-wrong adc footprint, buffer soldering error, backwards LCD connector footprint
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Software
 \subsection{Software} \index{Software} \label{subsec:software}
 
@@ -904,20 +903,23 @@ The rest of the code used can be found at Appendix~\ref{AP:Code}.
 \includepdf[pages={-}, fitpaper=true]{data/Schematics.pdf} 
  
 % list of changes to pcb and glen's code 
-%TODO
+\subsection{Changes} 
+The incorrect foootprint was used for the ADC in stock (SOP24, not TSSOP24), so all the ADC connections were rewired using the prototype area. The reset input was also connected to an unusable configuration pin and was rewired to an unused input pin. The LCD connector footprint was also numbered inversely to the schematic block, so the connector had to be soldered backwards. 
 
 \section{Software} \label{AP:Software} \index{Code}
 
 \subsection{Hardware descriptions} \label{AP:VHDL}
 \begin{fullpage}
-	\label{AP:scopetrig.vhd} 
-	\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
-	
 	\label{AP:VRAM_FSM.vhd}
 	\lstinputlisting[style=VHDLMeUp2]{data/VRAM_FSM.vhd}
+	
+	\label{AP:scopetrig.vhd} 
+	\lstinputlisting[style=VHDLMeUp2]{data/scoptrig.vhd} 
 \end{fullpage}
 
 \subsection{Main code} \label{AP:Code} \index{Code}
+Some edits were made to the main loop file (\ref{Code:mainloop.c}), and header files (\ref{Code:scopedef.h}, \ref{Code:interfac.h}) (which are the first files listed below).
+
 \begin{fullpage}
 	
 	\label{Code:mainloop.c}
